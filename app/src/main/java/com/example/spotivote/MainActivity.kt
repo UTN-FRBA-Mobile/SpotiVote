@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App() {
     val navController = rememberNavController()
+    var roomName by remember { mutableStateOf("X") }
     var accessToken by remember { mutableStateOf("") }
     val activity = LocalContext.current as Activity
 
@@ -42,7 +43,15 @@ fun App() {
             )
         }
         composable("room") {
-            CreateRoomScreen(accessToken)
+            CreateRoomScreen(accessToken,
+                onCreateRoom = {
+                    run {
+                        navController.navigate("room-by-id")
+                    }
+            })
+        }
+        composable("room-by-id") {
+            RoomByIdScreen(accessToken, roomName)
         }
     }
 }

@@ -1,8 +1,11 @@
 package com.example.spotivote
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -12,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import java.util.*
 
 enum class DeviceType {
@@ -88,12 +92,13 @@ fun DeviceItem(device: Device, onClick: () -> Unit) {
 }
 
 @Composable
-fun CreateRoomScreen(accessToken: String) {
+fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
     var name by remember { mutableStateOf("") }
     var playlists by remember { mutableStateOf<List<PlaylistItem>>(emptyList()) }
     var devices by remember { mutableStateOf<List<Device>>(emptyList()) }
 
     LaunchedEffect(Unit) {
+        Log.d("CreateRoomScreen", "Access Token: $accessToken")
         val response = spotifyService.getMyPlaylists("Bearer $accessToken")
         playlists = response.items
     }
@@ -118,7 +123,7 @@ fun CreateRoomScreen(accessToken: String) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Column() {
+            Column {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -141,11 +146,11 @@ fun CreateRoomScreen(accessToken: String) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Column() {
+            Column {
                 Text(text = "Your devices", style = MaterialTheme.typography.h2)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reiciendis illum praesentium.",
+                    text = "Select your device through which the songs will be played",
                     style = MaterialTheme.typography.body1
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -154,7 +159,7 @@ fun CreateRoomScreen(accessToken: String) {
                         .fillMaxWidth()
                         .clip(shape = RoundedCornerShape(6.dp))
                         .background(color = Color(0xFF404040))
-                        .padding(8.dp)
+                        .padding(12.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -169,11 +174,11 @@ fun CreateRoomScreen(accessToken: String) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Column() {
+            Column {
                 Text(text = "Your playlists", style = MaterialTheme.typography.h2)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reiciendis illum praesentium.",
+                    text = "Select your playlist you want to play initially",
                     style = MaterialTheme.typography.body1
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -181,25 +186,57 @@ fun CreateRoomScreen(accessToken: String) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(shape = RoundedCornerShape(6.dp))
+                        .height(120.dp)
                         .background(color = Color(0xFF404040))
-                        .padding(8.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        playlists.forEach { playlist ->
-                            Text(text = playlist.name)
-                            Spacer(modifier = Modifier.width(16.dp))
-                        }
+                    LazyColumn {
+                        items(items = playlists, itemContent = { playlist ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                                    .align(Alignment.CenterStart)
+                            ) {
+                                AsyncImage(
+                                    model = if (playlist.tracks.total != 0) playlist.images.elementAt(
+                                        0
+                                    ).url
+                                    else "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwZ4mTuUvdD6l60AzmWTIZ341ALx1udRQn3zv5va8czuI5VNApMbGqiIJGSuoe1EhreQY&usqp=CAU", //TODO imagen local o de sv propio
+                                    contentDescription = "Playlist Image",
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .size(50.dp)
+                                        .align(Alignment.CenterStart)
+                                        .fillMaxSize()
+
+                                )
+
+                                Column(
+                                    modifier = Modifier
+                                        .padding(start = 60.dp)
+                                        .align(Alignment.CenterStart)
+                                ) {
+                                    Text(
+                                        text = playlist.name,
+                                        style = MaterialTheme.typography.body1
+                                    )
+                                    Text(
+                                        text = "${playlist.tracks.total} song${(if (playlist.tracks.total != 1) "s" else "")}",
+                                        style = MaterialTheme.typography.body2,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        })
                     }
                 }
             }
 
-
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = {}, modifier = Modifier
+                onClick = { onCreateRoom() },
+                modifier = Modifier
                     .height(48.dp)
                     .clip(RoundedCornerShape(100.dp))
             ) {
@@ -211,5 +248,4 @@ fun CreateRoomScreen(accessToken: String) {
             }
         }
     }
-
 }
