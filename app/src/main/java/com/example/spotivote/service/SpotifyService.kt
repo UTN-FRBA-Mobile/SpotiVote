@@ -1,5 +1,7 @@
-package com.example.spotivote
+package com.example.spotivote.service
 
+import com.example.spotivote.service.dto.*
+//import com.example.spotivote.ui.screens.SearchResult
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -7,6 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
+import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 
 val okHttpClient = OkHttpClient
@@ -55,57 +58,19 @@ interface SpotifyService {
         @Path("user_id") userId: String,
         @Header("Authorization") authHeader: String
     ): UserResponse
+
+    @GET("v1/me/top/{type}")
+    suspend fun getUserTopItems(
+        @Path("type") type: String = "tracks",
+        @Query("limit") limit: Int,
+        @Header("Authorization") authHeader: String
+    ): UserTopItemsResponse
+
+    @GET("search?type=track")
+    suspend fun searchTracks(
+        @Header("Authorization") authorization: String,
+        @Query("q") query: String
+    ): Response<Any>
+    //): Response<SearchResult>
 }
 
-data class UserResponse(
-    val display_name: String,
-    val images: List<Image>
-)
-
-data class PlaylistResponse(
-    val items: List<PlaylistItem>
-)
-
-data class PlaylistItem(
-    val name: String,
-    val href: String,
-    val tracks: PlaylistItemTrack,
-    val images: List<Image>
-)
-
-data class Image(val url: String)
-
-data class PlaylistItemTrack(
-    val total: Int,
-)
-
-data class AvailableDevicesResponse(
-    val devices: List<SpotifyDevice>
-)
-
-data class SpotifyDevice(
-    val id: String,
-    val is_active: Boolean,
-    val is_private_session: Boolean,
-    val is_restricted: Boolean,
-    val name: String,
-    val type: String,
-    val volume_percent: Int
-)
-
-data class CurrentlyPlayingResponse(
-    val context: CurrentlyPlayingContext,
-    val item: TrackItem,
-)
-
-data class CurrentlyPlayingContext(val href: String)
-data class TrackItem(val album: TrackItemAlbum, val name: String, val id: String)
-data class TrackItemAlbum(val artists: List<TrackItemAlbumArtist>, val images: List<Image>)
-data class TrackItemAlbumArtist(val name: String)
-
-data class PlaylistTracksResponse(
-    val items: List<PlaylistTracksItem>,
-)
-
-data class PlaylistTracksItem(val added_by: AddedBy, val track: TrackItem)
-data class AddedBy(val id: String)

@@ -1,4 +1,4 @@
-package com.example.spotivote
+package com.example.spotivote.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -17,13 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import java.util.*
-
-enum class DeviceType {
-    SMARTPHONE,
-    COMPUTER,
-    TV,
-    SPEAKER
-}
+import com.example.spotivote.model.Device
+import com.example.spotivote.model.DeviceType
+import com.example.spotivote.service.*
+import com.example.spotivote.service.dto.*
 
 fun mapToDeviceType(type: String): DeviceType {
     return when (type.lowercase(Locale.getDefault())) {
@@ -34,8 +31,6 @@ fun mapToDeviceType(type: String): DeviceType {
         else -> DeviceType.SMARTPHONE
     }
 }
-
-data class Device(val name: String, val type: DeviceType, val id: String)
 
 // list of dummy devices
 val dummyDevices = listOf(
@@ -186,7 +181,7 @@ fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(shape = RoundedCornerShape(6.dp))
-                        .height(120.dp)
+                        .fillMaxHeight(0.55f)
                         .background(color = Color(0xFF404040))
                 ) {
                     LazyColumn {
