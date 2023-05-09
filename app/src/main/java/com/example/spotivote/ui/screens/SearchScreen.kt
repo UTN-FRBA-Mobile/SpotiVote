@@ -1,10 +1,6 @@
 package com.example.spotivote.ui.screens
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,42 +15,37 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.spotivote.model.Track
 import com.example.spotivote.service.spotifyService
-
-private fun launchSuggestTrack(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
-    //val intent =
-    //launcher.launch(intent)
-}
+import kotlinx.coroutines.launch
 
 @Composable
-fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
+fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
+    var searchText by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
-
-    LaunchedEffect(Unit) {
-        val response = spotifyService.getUserTopItems("tracks", 10, "Bearer $accessToken")
-
-        tracks = response.items.map { it ->
-            val artists: String = it.artists.joinToString(separator = ", ") { it.name }
-            Track(
-                id = it.id,
-                name = it.name,
-                artists = artists,
-                imageUri = it.album.images.elementAt(0).url,
-            )
-
-        }
-    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "Suggest Track",
-                style = MaterialTheme.typography.h1,
-                modifier = Modifier.fillMaxWidth()
+
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                    coroutineScope.launch {
+                        tracks = if (searchText.isNotEmpty())
+                                    searchTracksByText(accessToken, searchText)
+                                    else emptyList()
+                    }
+                },
+                label = { Text(text = "What song/artist do you want to search?") },
+                placeholder = { Text(text = "Search...") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
             )
 
             Column {
@@ -62,14 +53,10 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
                     modifier = Modifier
                         .padding(top = 12.dp)
                 ) {
-                    Text(text = "Your most listened songs", style = MaterialTheme.typography.h2)
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     Box(
                         modifier = Modifier
-                            .clip(shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
-                            .fillMaxHeight(0.8f)
+                            .clip(shape = RoundedCornerShape(6.dp))
+                            .fillMaxHeight(0.9f)
                             .background(color = Color(0xFF404040))
                     ) {
                         LazyColumn {
@@ -110,22 +97,6 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
                             })
                         }
                     }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(shape = RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
-                            .background(color = Color(0xFF404040))
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .clickable { onSuggestTrack() }
-                    ) {
-                        Text(
-                            text = "Search another",
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(horizontal = 24.dp)
-                        )
-                    }
                 }
             }
 
@@ -138,7 +109,7 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
                     .clip(RoundedCornerShape(100.dp))
             ) {
                 Text(
-                    text = "Suggest Track",
+                    text = "Confirm suggest",
                     style = MaterialTheme.typography.button,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
@@ -146,3 +117,22 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
         }
     }
 }
+
+private suspend fun searchTracksByText(accessToken: String, searchText: String): List<Track> {
+    val response =
+        spotifyService.searchTracks("Bearer $accessToken", query = searchText)
+
+    return response.tracks.items.map { it ->
+        val artists: String =
+            it.artists.joinToString(separator = ", ") { it.name }
+        Track(
+            id = it.id,
+            name = it.name,
+            artists = artists,
+            imageUri = it.album.images.elementAt(0).url,
+        )
+    }
+}
+
+
+

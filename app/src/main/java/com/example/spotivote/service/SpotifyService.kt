@@ -1,7 +1,6 @@
 package com.example.spotivote.service
 
 import com.example.spotivote.service.dto.*
-//import com.example.spotivote.ui.screens.SearchResult
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -66,11 +65,11 @@ interface SpotifyService {
         @Header("Authorization") authHeader: String
     ): UserTopItemsResponse
 
-    @GET("search?type=track")
+    @GET("v1/search")
     suspend fun searchTracks(
         @Header("Authorization") authorization: String,
+        @Query("type") type: String = "track,artist",
         @Query("q") query: String
-    ): Response<Any>
-    //): Response<SearchResult>
+    ): SearchResultResponse
 }
 

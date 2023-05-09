@@ -65,6 +65,15 @@ fun App() {
             SuggestTrackScreen(accessToken,
                 onSuggestTrack = {
                     run {
+                        navController.navigate("search")
+                    }
+                }
+            )
+        }
+        composable("search") {
+            SearchScreen(accessToken,
+                onSearchTrack = {
+                    run {
                         navController.navigate("")
                     }
                 }
