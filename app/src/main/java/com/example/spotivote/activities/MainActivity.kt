@@ -1,4 +1,4 @@
-package com.example.spotivote
+package com.example.spotivote.activities
 
 import android.app.Activity
 import android.os.Bundle
@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.spotivote.ui.screens.*
 import com.example.spotivote.ui.theme.SpotivoteTheme
 
 class MainActivity : ComponentActivity() {
@@ -48,10 +49,35 @@ fun App() {
                     run {
                         navController.navigate("room-by-id")
                     }
-            })
+                }
+            )
         }
         composable("room-by-id") {
-            RoomByIdScreen(accessToken, roomName)
+            RoomByIdScreen(accessToken, roomName,
+                onGoToSuggestTrack = {
+                    run {
+                        navController.navigate("suggest-track")
+                    }
+                }
+            )
+        }
+        composable("suggest-track") {
+            SuggestTrackScreen(accessToken,
+                onSuggestTrack = {
+                    run {
+                        navController.navigate("search")
+                    }
+                }
+            )
+        }
+        composable("search") {
+            SearchScreen(accessToken,
+                onSearchTrack = {
+                    run {
+                        navController.navigate("")
+                    }
+                }
+            )
         }
     }
 }

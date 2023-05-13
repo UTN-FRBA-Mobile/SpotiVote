@@ -1,5 +1,6 @@
-package com.example.spotivote
+package com.example.spotivote.ui.screens
 
+import com.example.spotivote.model.*
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.spotivote.service.spotifyService
 import java.net.HttpURLConnection
 
 private fun launchCreateRoom(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
@@ -25,18 +27,8 @@ private fun launchCreateRoom(activity: Activity, launcher: ActivityResultLaunche
     //launcher.launch(intent)
 }
 
-data class Track(
-    val id: String = "", val name: String = "", val artists: String = "",
-    val playlistId: String = "", val imageUri: String = "", var addedById: String = ""
-)
-
-data class User(
-    val displayName: String = "",
-    val imageUri: String = ""
-)
-
 @Composable
-fun RoomByIdScreen(accessToken: String, roomName: String) {
+fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: () -> Unit) {
     var roomName by remember { mutableStateOf(roomName) }
 
     var trackCurrentlyPlaying by remember { mutableStateOf(Track()) }
@@ -47,7 +39,7 @@ fun RoomByIdScreen(accessToken: String, roomName: String) {
         val response = spotifyService.getCurrentlyPlaying("Bearer $accessToken")
         if (response.code() == HttpURLConnection.HTTP_OK) {
             val playlistId = response.body()!!.context.href.split("/").last()
-            val artists: String = response.body()!!.item.album.artists
+            val artists: String = response.body()!!.item.artists
                 .joinToString(separator = ", ") { it.name }
 
             trackCurrentlyPlaying = Track(
@@ -236,7 +228,7 @@ fun RoomByIdScreen(accessToken: String, roomName: String) {
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = {},
+                onClick = { onGoToSuggestTrack() },
                 modifier = Modifier
                     .height(48.dp)
                     .clip(RoundedCornerShape(100.dp))

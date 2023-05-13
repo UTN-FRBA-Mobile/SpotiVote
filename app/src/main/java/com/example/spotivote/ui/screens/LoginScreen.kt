@@ -1,4 +1,4 @@
-package com.example.spotivote
+package com.example.spotivote.ui.screens
 
 import android.app.Activity
 import android.content.Intent
@@ -35,7 +35,8 @@ private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLaunc
             "user-read-playback-state",
             "user-read-private",
             "user-read-email",
-            "user-modify-playback-state"
+            "user-modify-playback-state",
+            "user-top-read"
         )
     )
     val request = builder.build()
