@@ -36,6 +36,8 @@ private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLaunc
             "user-read-private",
             "user-read-email",
             "user-modify-playback-state",
+            "user-read-currently-playing",
+            "playlist-read-private",
             "user-top-read"
         )
     )

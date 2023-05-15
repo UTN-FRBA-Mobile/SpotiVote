@@ -38,7 +38,9 @@ fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: ()
     LaunchedEffect(Unit) {
         val response = spotifyService.getCurrentlyPlaying("Bearer $accessToken")
         if (response.code() == HttpURLConnection.HTTP_OK) {
-            val playlistId = response.body()!!.context.href.split("/").last()
+            val playlistId = if (response.body()?.context != null)
+                response.body()!!.context.href.split("/").last()
+            else ""
             val artists: String = response.body()!!.item.artists
                 .joinToString(separator = ", ") { it.name }
 
@@ -50,18 +52,22 @@ fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: ()
                 imageUri = response.body()!!.item.album.images.elementAt(0).url,
             )
 
-            val tracksResponse = spotifyService.getTracksByPlaylistId(
-                playlistId,
-                "Bearer $accessToken"
-            )
-            val track = tracksResponse.items.find { it.track.id == response.body()!!.item.id }
-            if (track?.added_by?.id?.isNotBlank() == true) {
-                trackCurrentlyPlaying.addedById = track.added_by.id
-                val userResponse = spotifyService.getUserById(
-                    track.added_by.id,
+            if (playlistId.isNotEmpty()) {
+                val tracksResponse = spotifyService.getTracksByPlaylistId(
+                    playlistId,
                     "Bearer $accessToken"
                 )
-                user = User(userResponse.display_name, userResponse.images.first().url)
+                if (tracksResponse.code() != HttpURLConnection.HTTP_OK) return@LaunchedEffect
+                val track =
+                    tracksResponse.body()!!.items.find { it.track.id == response.body()!!.item.id }
+                if (track?.added_by?.id?.isNotBlank() == true) {
+                    trackCurrentlyPlaying.addedById = track.added_by.id
+                    val userResponse = spotifyService.getUserById(
+                        track.added_by.id,
+                        "Bearer $accessToken"
+                    )
+                    user = User(userResponse.display_name, userResponse.images.first().url)
+                }
             }
         }
     }
