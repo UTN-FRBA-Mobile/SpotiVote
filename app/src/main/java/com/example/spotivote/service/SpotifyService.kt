@@ -47,8 +47,9 @@ interface SpotifyService {
 
     @GET("v1/playlists/{playlist_id}/tracks")
     suspend fun getTracksByPlaylistId(
-        @Path("playlist_id") playlistId: String, @Header("Authorization") authHeader: String
-    ): PlaylistTracksResponse
+        @Path("playlist_id") playlistId: String,
+        @Header("Authorization") authHeader: String
+    ): Response<PlaylistTracksResponse>
 
     @GET("v1/users/{user_id}")
     suspend fun getUserById(

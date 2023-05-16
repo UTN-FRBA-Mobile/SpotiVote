@@ -47,25 +47,44 @@ fun RoomByIdScreen(
                 imageUri = response.body()!!.item.album.images.elementAt(0).url,
             )
 
-            val userResponse = spotifyService.getMe(
-                "Bearer $accessToken"
-            )
-            user = User(userResponse.display_name, userResponse.images.first().url)
+
+            if (playlistId.isNotEmpty()) {
+                val tracksResponse = spotifyService.getTracksByPlaylistId(
+                    playlistId, "Bearer $accessToken"
+                )
+                if (tracksResponse.code() != HttpURLConnection.HTTP_OK) return@LaunchedEffect
+                val track =
+                    tracksResponse.body()!!.items.find { it.track.id == response.body()!!.item.id }
+
+
+                val userResponse = if (track != null) {
+                    spotifyService.getUserById(
+                        track.added_by.id, "Bearer $accessToken"
+                    )
+                } else {
+                    spotifyService.getMe(
+                        "Bearer $accessToken"
+                    )
+                }
+
+                trackCurrentlyPlaying.addedById = userResponse.id
+                user = User(userResponse.display_name, userResponse.images.first().url)
+            }
 
             val playlistResponse =
                 spotifyService.getTracksByPlaylistId(playlistId, "Bearer $accessToken")
 
+            if (playlistResponse.code() != HttpURLConnection.HTTP_OK) return@LaunchedEffect
+            val playlist = playlistResponse.body()!!
 
-
-            tracks = playlistResponse.items.map { it ->
-                val artists: String = it.track.artists.joinToString(separator = ", ") { it.name }
+            tracks = playlist.items.map { it ->
                 Track(
                     id = it.track.id,
                     name = it.track.name,
-                    artists = artists,
+                    artists = it.track.artists.joinToString(separator = ", ") { it.name },
                     imageUri = it.track.album.images.elementAt(0).url,
                 )
-            }.slice(0..3)
+            }.slice(0..2)
         }
     }
 
@@ -83,7 +102,7 @@ fun RoomByIdScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Room X",
+                text = "Room $roomName",
                 style = MaterialTheme.typography.h1,
                 modifier = Modifier.fillMaxWidth()
             )
