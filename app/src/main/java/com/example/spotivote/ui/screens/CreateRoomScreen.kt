@@ -6,8 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,11 +18,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import java.util.*
 import com.example.spotivote.model.Device
 import com.example.spotivote.model.DeviceType
-import com.example.spotivote.service.*
-import com.example.spotivote.service.dto.*
+import com.example.spotivote.service.dto.PlaylistItem
+import com.example.spotivote.service.spotifyService
+import java.util.*
 
 fun mapToDeviceType(type: String): DeviceType {
     return when (type.lowercase(Locale.getDefault())) {
@@ -31,13 +33,6 @@ fun mapToDeviceType(type: String): DeviceType {
         else -> DeviceType.SMARTPHONE
     }
 }
-
-// list of dummy devices
-val dummyDevices = listOf(
-    Device("Device 1", DeviceType.SMARTPHONE, "1"),
-    Device("Device 2", DeviceType.COMPUTER, "2"),
-    Device("Device 3", DeviceType.TV, "3"),
-)
 
 fun deviceTypeName(type: DeviceType): String {
     return when (type) {
@@ -87,10 +82,11 @@ fun DeviceItem(device: Device, onClick: () -> Unit) {
 }
 
 @Composable
-fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
+fun CreateRoomScreen(accessToken: String, onCreateRoom: (playlistId: String) -> Unit) {
     var name by remember { mutableStateOf("") }
     var playlists by remember { mutableStateOf<List<PlaylistItem>>(emptyList()) }
     var devices by remember { mutableStateOf<List<Device>>(emptyList()) }
+    var playlistId by remember { mutableStateOf("4OuKrqSr7eIWcDZ6Sl5Btv") }
 
     LaunchedEffect(Unit) {
         Log.d("CreateRoomScreen", "Access Token: $accessToken")
@@ -105,10 +101,14 @@ fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
         }
     }
 
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()), color = MaterialTheme.colors.background
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxHeight()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -118,25 +118,23 @@ fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Column {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp)
-                ) {
-                    Text(
-                        text = "Room name", style = MaterialTheme.typography.h2
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text(text = "Enter room name") },
-                        placeholder = { Text(text = "Lorem, ipsum dolor sit amet") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp)
+            ) {
+                Text(
+                    text = "Room name", style = MaterialTheme.typography.h2
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(text = "Enter room name") },
+                    placeholder = { Text(text = "Lorem, ipsum dolor sit amet") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -181,16 +179,17 @@ fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(shape = RoundedCornerShape(6.dp))
-                        .fillMaxHeight(0.55f)
+                        .height(400.dp)
                         .background(color = Color(0xFF404040))
                 ) {
                     LazyColumn {
-                        items(items = playlists, itemContent = { playlist ->
+                        items(items = playlists) { playlist ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(12.dp)
                                     .align(Alignment.CenterStart)
+                                    .clickable(onClick = { playlistId = playlist.id })
                             ) {
                                 AsyncImage(
                                     model = if (playlist.tracks.total != 0) playlist.images.elementAt(
@@ -213,7 +212,7 @@ fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
                                 ) {
                                     Text(
                                         text = playlist.name,
-                                        style = MaterialTheme.typography.body1
+                                        style = MaterialTheme.typography.body1,
                                     )
                                     Text(
                                         text = "${playlist.tracks.total} song${(if (playlist.tracks.total != 1) "s" else "")}",
@@ -222,15 +221,19 @@ fun CreateRoomScreen(accessToken: String, onCreateRoom: () -> Unit) {
                                     )
                                 }
                             }
-                        })
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(
+                modifier = Modifier
+                    .height(24.dp)
+                    .weight(1f)
+            )
 
             Button(
-                onClick = { onCreateRoom() },
+                onClick = { onCreateRoom(playlistId) },
                 modifier = Modifier
                     .height(48.dp)
                     .clip(RoundedCornerShape(100.dp))

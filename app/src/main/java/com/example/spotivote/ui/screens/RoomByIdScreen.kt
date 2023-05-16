@@ -1,16 +1,17 @@
 package com.example.spotivote.ui.screens
 
-import com.example.spotivote.model.*
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,19 +19,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.spotivote.model.Track
+import com.example.spotivote.model.User
 import com.example.spotivote.service.spotifyService
 import java.net.HttpURLConnection
 
-private fun launchCreateRoom(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
-    // TODO: Create Room in DB with name, device and playlist
-    //val intent =
-    //launcher.launch(intent)
-}
 
 @Composable
-fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: () -> Unit) {
-    var roomName by remember { mutableStateOf(roomName) }
-
+fun RoomByIdScreen(
+    accessToken: String, roomName: String, playlistId: String, onGoToSuggestTrack: () -> Unit
+) {
     var trackCurrentlyPlaying by remember { mutableStateOf(Track()) }
     var user by remember { mutableStateOf(User()) }
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
@@ -38,9 +36,8 @@ fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: ()
     LaunchedEffect(Unit) {
         val response = spotifyService.getCurrentlyPlaying("Bearer $accessToken")
         if (response.code() == HttpURLConnection.HTTP_OK) {
-            val playlistId = response.body()!!.context.href.split("/").last()
-            val artists: String = response.body()!!.item.artists
-                .joinToString(separator = ", ") { it.name }
+            val artists: String =
+                response.body()!!.item.artists.joinToString(separator = ", ") { it.name }
 
             trackCurrentlyPlaying = Track(
                 id = response.body()!!.item.id,
@@ -50,35 +47,38 @@ fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: ()
                 imageUri = response.body()!!.item.album.images.elementAt(0).url,
             )
 
-            val tracksResponse = spotifyService.getTracksByPlaylistId(
-                playlistId,
+            val userResponse = spotifyService.getMe(
                 "Bearer $accessToken"
             )
-            val track = tracksResponse.items.find { it.track.id == response.body()!!.item.id }
-            if (track?.added_by?.id?.isNotBlank() == true) {
-                trackCurrentlyPlaying.addedById = track.added_by.id
-                val userResponse = spotifyService.getUserById(
-                    track.added_by.id,
-                    "Bearer $accessToken"
+            user = User(userResponse.display_name, userResponse.images.first().url)
+
+            val playlistResponse =
+                spotifyService.getTracksByPlaylistId(playlistId, "Bearer $accessToken")
+
+
+
+            tracks = playlistResponse.items.map { it ->
+                val artists: String = it.track.artists.joinToString(separator = ", ") { it.name }
+                Track(
+                    id = it.track.id,
+                    name = it.track.name,
+                    artists = artists,
+                    imageUri = it.track.album.images.elementAt(0).url,
                 )
-                user = User(userResponse.display_name, userResponse.images.first().url)
-            }
+            }.slice(0..3)
         }
     }
 
-    LaunchedEffect(Unit) {
-        // TODO get suggested tracks to the votation
-        tracks = listOf(
-            Track("1", "Luces", "Paulo Londra", "", ""),
-            Track("2", "Arrancamelo", "Wos", "", ""),
-            Track("3", "Givenchy", "Duki", "", ""),
-        )
-    }
-
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState()),
+        color = MaterialTheme.colors.background
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxHeight()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -88,48 +88,46 @@ fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: ()
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Column {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp)
-                ) {
-                    Text(
-                        text = "Playing now", style = MaterialTheme.typography.h2
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Column {
-                        Box(
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp)
+            ) {
+                Text(
+                    text = "Playing now", style = MaterialTheme.typography.h2
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(shape = RoundedCornerShape(6.dp))
+                            .background(color = Color(0xFF404040))
+                            .padding(12.dp)
+                    ) {
+                        AsyncImage(
+                            model = trackCurrentlyPlaying.imageUri,
+                            contentDescription = "Track Image",
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(shape = RoundedCornerShape(6.dp))
-                                .background(color = Color(0xFF404040))
-                                .padding(12.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .size(50.dp)
+                                .align(Alignment.CenterStart)
+                                .fillMaxSize()
+                        )
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 60.dp)
+                                .align(Alignment.CenterStart)
                         ) {
-                            AsyncImage(
-                                model = trackCurrentlyPlaying.imageUri,
-                                contentDescription = "Track Image",
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .size(50.dp)
-                                    .align(Alignment.CenterStart)
-                                    .fillMaxSize()
+                            Text(
+                                text = trackCurrentlyPlaying.name,
+                                style = MaterialTheme.typography.body1
                             )
-                            Column(
-                                modifier = Modifier
-                                    .padding(start = 60.dp)
-                                    .align(Alignment.CenterStart)
-                            ) {
-                                Text(
-                                    text = trackCurrentlyPlaying.name,
-                                    style = MaterialTheme.typography.body1
-                                )
-                                Text(
-                                    text = trackCurrentlyPlaying.artists,
-                                    style = MaterialTheme.typography.body2,
-                                    color = Color.Gray
-                                )
-                            }
+                            Text(
+                                text = trackCurrentlyPlaying.artists,
+                                style = MaterialTheme.typography.body2,
+                                color = Color.Gray
+                            )
                         }
                     }
                 }
@@ -162,8 +160,7 @@ fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: ()
                             .align(Alignment.CenterStart)
                     ) {
                         Text(
-                            text = user.displayName,
-                            style = MaterialTheme.typography.body1
+                            text = user.displayName, style = MaterialTheme.typography.body1
                         )
                     }
                 }
@@ -171,61 +168,59 @@ fun RoomByIdScreen(accessToken: String, roomName: String, onGoToSuggestTrack: ()
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Column {
-                Column(
+            Column(
+                modifier = Modifier.padding(top = 12.dp)
+            ) {
+                Text(text = "Vote next track", style = MaterialTheme.typography.h2)
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
                     modifier = Modifier
-                        .padding(top = 12.dp)
+                        .clip(shape = RoundedCornerShape(6.dp))
+                        .background(color = Color(0xFF404040))
                 ) {
-                    Text(text = "Vote next track", style = MaterialTheme.typography.h2)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(shape = RoundedCornerShape(6.dp))
-                            .background(color = Color(0xFF404040))
-                    ) {
-                        LazyColumn {
-                            items(items = tracks, itemContent = { track ->
-                                Box(
+                    LazyColumn(modifier = Modifier.height(300.dp)) {
+                        items(items = tracks, itemContent = { track ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                                    .align(Alignment.CenterStart)
+//                                    .clickable(onClick = { playTrack(track.id) })
+                            ) {
+                                AsyncImage(
+                                    model = track.imageUri,
+                                    contentDescription = "Playlist Image",
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .size(50.dp)
+                                        .align(Alignment.CenterStart)
+                                        .fillMaxSize()
+
+                                )
+
+                                Column(
+                                    modifier = Modifier
+                                        .padding(start = 60.dp)
                                         .align(Alignment.CenterStart)
                                 ) {
-                                    AsyncImage(
-                                        model = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwZ4mTuUvdD6l60AzmWTIZ341ALx1udRQn3zv5va8czuI5VNApMbGqiIJGSuoe1EhreQY&usqp=CAU", //TODO imagen local o de sv propio,
-                                        //model = track.images.elementAt(0).url,
-                                        contentDescription = "Playlist Image",
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(2.dp))
-                                            .size(50.dp)
-                                            .align(Alignment.CenterStart)
-                                            .fillMaxSize()
-
+                                    Text(
+                                        text = track.name, style = MaterialTheme.typography.body1
                                     )
-
-                                    Column(
-                                        modifier = Modifier
-                                            .padding(start = 60.dp)
-                                            .align(Alignment.CenterStart)
-                                    ) {
-                                        Text(
-                                            text = track.name,
-                                            style = MaterialTheme.typography.body1
-                                        )
-                                        Text(
-                                            text = track.artists,
-                                            style = MaterialTheme.typography.body2,
-                                            color = Color.Gray
-                                        )
-                                    }
+                                    Text(
+                                        text = track.artists,
+                                        style = MaterialTheme.typography.body2,
+                                        color = Color.Gray
+                                    )
                                 }
-                            })
-                        }
+                            }
+                        })
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(
+                modifier = Modifier.height(34.dp)
+            )
 
             Button(
                 onClick = { onGoToSuggestTrack() },

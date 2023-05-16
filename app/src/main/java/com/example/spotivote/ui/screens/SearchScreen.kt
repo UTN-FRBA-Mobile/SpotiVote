@@ -37,9 +37,9 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
                 onValueChange = {
                     searchText = it
                     coroutineScope.launch {
-                        tracks = if (searchText.isNotEmpty())
-                                    searchTracksByText(accessToken, searchText)
-                                    else emptyList()
+                        tracks =
+                            if (searchText.isNotEmpty()) searchTracksByText(accessToken, searchText)
+                            else emptyList()
                     }
                 },
                 label = { Text(text = "What song/artist do you want to search?") },
@@ -50,8 +50,7 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
 
             Column {
                 Column(
-                    modifier = Modifier
-                        .padding(top = 12.dp)
+                    modifier = Modifier.padding(top = 12.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -103,8 +102,7 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = {},
-                modifier = Modifier
+                onClick = {}, modifier = Modifier
                     .height(48.dp)
                     .clip(RoundedCornerShape(100.dp))
             ) {
@@ -119,12 +117,10 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
 }
 
 private suspend fun searchTracksByText(accessToken: String, searchText: String): List<Track> {
-    val response =
-        spotifyService.searchTracks("Bearer $accessToken", query = searchText)
+    val response = spotifyService.searchTracks("Bearer $accessToken", query = searchText)
 
     return response.tracks.items.map { it ->
-        val artists: String =
-            it.artists.joinToString(separator = ", ") { it.name }
+        val artists: String = it.artists.joinToString(separator = ", ") { it.name }
         Track(
             id = it.id,
             name = it.name,
