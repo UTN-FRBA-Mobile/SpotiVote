@@ -29,6 +29,7 @@ fun App() {
     val navController = rememberNavController()
     var roomName by remember { mutableStateOf("X") }
     var accessToken by remember { mutableStateOf("") }
+    var playlistId by remember { mutableStateOf("") }
     val activity = LocalContext.current as Activity
 
     NavHost(navController = navController, startDestination = "home") {
@@ -45,7 +46,8 @@ fun App() {
         }
         composable("room") {
             CreateRoomScreen(accessToken,
-                onCreateRoom = {
+                onCreateRoom = { it ->
+                    playlistId = it
                     run {
                         navController.navigate("room-by-id")
                     }
@@ -53,7 +55,7 @@ fun App() {
             )
         }
         composable("room-by-id") {
-            RoomByIdScreen(accessToken, roomName,
+            RoomByIdScreen(accessToken, roomName, playlistId,
                 onGoToSuggestTrack = {
                     run {
                         navController.navigate("suggest-track")
