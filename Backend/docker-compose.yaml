@@ -1,0 +1,44 @@
+services:
+  api:
+    # depends_on:
+    #   mongodb:
+    #     condition: service_healthy
+
+    container_name: api
+    build:
+      context: .
+      target: development
+    volumes:
+      - './src/:/workspace/src'
+      - './node_modules:/workspace/node_modules'
+    command: "npm run start:debug"
+    environment:
+      - MONGODB_URI=mongodb://root:123456@mongodb:27017/
+    ports:
+      - 4001:3000
+      - 9001:9229
+    networks:
+      - api-network
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    # healthcheck:
+    #   test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 40s
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+    ports:
+      - "27017:27017"
+    volumes:
+      - ~/mongo:/data/db
+    networks:
+      - api-network
+
+networks:
+  api-network:
+    driver: bridge
