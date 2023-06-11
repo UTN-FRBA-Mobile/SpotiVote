@@ -23,8 +23,8 @@ import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 
 
-val CLIENT_ID = "<your client id>"
-val REDIRECT_URI = "<your redirect uri>"
+val CLIENT_ID = "<YOUR_CLIENT_ID>"
+val REDIRECT_URI = "com.example.spotivote://callback"
 
 private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
     val builder = AuthorizationRequest.Builder(
@@ -39,8 +39,8 @@ private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLaunc
             "user-read-currently-playing",
             "playlist-read-private",
             "user-top-read"
-        )
     )
+        )
     val request = builder.build()
 
     val intent = AuthorizationClient.createLoginActivityIntent(
