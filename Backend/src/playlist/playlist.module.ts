@@ -6,6 +6,7 @@ import { Playlist, PlaylistSchema } from './schemas/playlist.schema';
 import { SpotifyModule } from '@app/spotify';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SpotifyModuleOptions } from '@app/spotify/interfaces/spotify-module-options';
+import { PlaylistGateway } from './playlist.gateway';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { SpotifyModuleOptions } from '@app/spotify/interfaces/spotify-module-opt
     }),
   ],
   controllers: [PlaylistController],
-  providers: [PlaylistService],
+  providers: [PlaylistService, PlaylistGateway],
 })
 export class PlaylistModule {}
