@@ -18,9 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.example.spotivote.service.WebSocketListener
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 val CLIENT_ID = "4240d4ecfccb4c6eaa9f064ead594324"
 val REDIRECT_URI = "com.example.spotivote://callback"
@@ -60,6 +63,7 @@ fun LoginScreen(activity: Activity, onLogin: (String) -> Unit) {
             onLogin(response.accessToken)
         }
     }
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -73,8 +77,7 @@ fun LoginScreen(activity: Activity, onLogin: (String) -> Unit) {
             Text("Spotivote", style = MaterialTheme.typography.h2)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Music voting for everyone",
-                style = MaterialTheme.typography.body1
+                text = "Music voting for everyone", style = MaterialTheme.typography.body1
             )
 
             Spacer(modifier = Modifier.weight(1f))
