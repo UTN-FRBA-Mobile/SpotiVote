@@ -39,8 +39,8 @@ private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLaunc
             "user-read-currently-playing",
             "playlist-read-private",
             "user-top-read"
-    )
         )
+    )
     val request = builder.build()
 
     val intent = AuthorizationClient.createLoginActivityIntent(

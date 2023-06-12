@@ -49,8 +49,7 @@ fun App() {
             "Bearer $accessToken"
         )
         user = User(
-            response.display_name,
-            response.images[0].url
+            response.display_name, response.images[0].url
         )
     }
 
@@ -71,23 +70,19 @@ fun App() {
         }
 
         composable("home") {
-            HomeScreen(
-                user,
-                onNavigateToCreateRoom = {
-                    run {
-                        navController.navigate("create-room")
-                    }
-                },
-                onNavigateToJoinRoom = {
-                    run {
-                        navController.navigate("join-room")
-                    }
+            HomeScreen(user, onNavigateToCreateRoom = {
+                run {
+                    navController.navigate("create-room")
                 }
-            )
+            }, onNavigateToJoinRoom = {
+                run {
+                    navController.navigate("join-room")
+                }
+            })
         }
 
         composable("create-room") {
-            CreateRoomScreen(accessToken, onCreateRoom = {
+            CreateRoomScreen(accessToken, user, onCreateRoom = {
                 roomConfig = it
                 run {
                     navController.navigate("room-by-id")
