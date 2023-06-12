@@ -11,8 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.example.spotivote.service.WebSocketListener
 import com.example.spotivote.ui.components.CurrentlyPlaying
 import com.example.spotivote.ui.components.VoteSection
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 
 @Composable
