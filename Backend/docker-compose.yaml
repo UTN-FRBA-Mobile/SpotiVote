@@ -1,10 +1,10 @@
 services:
-  api:
+  spotivote-api:
     # depends_on:
     #   mongodb:
     #     condition: service_healthy
 
-    container_name: api
+    container_name: spotivote-api
     build:
       context: .
       target: development
@@ -21,7 +21,7 @@ services:
       - api-network
 
   mongodb:
-    container_name: mongodb
+    container_name: mongodb-spotivote
     image: mongo:latest
     # healthcheck:
     #   test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
