@@ -100,7 +100,7 @@ fun App() {
 //        }
 
         composable("room-by-id") {
-            RoomByIdScreen(accessToken, roomConfig, onGoToSuggestTrack = {
+            RoomByIdScreen(accessToken, user, roomConfig, onGoToSuggestTrack = {
                 run {
                     navController.navigate("suggest-track")
                 }

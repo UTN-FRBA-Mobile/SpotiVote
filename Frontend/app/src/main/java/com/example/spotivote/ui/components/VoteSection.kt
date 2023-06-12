@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -53,7 +54,7 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
 
     val client = OkHttpClient()
     val socketUrl =
-        "wss://s9157.nyc1.piesocket.com/v3/1?api_key=SqxisaikNnHg4X7o3DxtIm7sAPCz6ho8Wu9Z76PF&notify_self=1"
+        "ws://localhost:8055"
     val request: Request = Request.Builder().url(socketUrl).build()
 
     val listener = WebSocketListener(
@@ -78,23 +79,25 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
             modifier = Modifier
                 .clip(shape = RoundedCornerShape(6.dp))
                 .background(color = Color(0xFF404040))
-                .fillMaxHeight(0.76f)
+                .height(400.dp)
         ) {
             LazyColumn {
                 items(items = tracks, itemContent = { trackInPoll ->
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                        .align(Alignment.CenterStart)
-                        .clickable(onClick = {
-                            // vote
-                            trackId = trackInPoll.track.id
-                        })
-                        .background(
-                            color = if (trackId == trackInPoll.track.id) Color(
-                                0xFF303030
-                            ) else Color.Transparent
-                        )) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                            .align(Alignment.CenterStart)
+                            .clickable(onClick = {
+                                // vote
+                                trackId = trackInPoll.track.id
+                            })
+                            .background(
+                                color = if (trackId == trackInPoll.track.id) Color(
+                                    0xFF303030
+                                ) else Color.Transparent
+                            )
+                    ) {
                         Row() {
                             AsyncImage(
                                 model = trackInPoll.track.imageUri,
@@ -125,10 +128,30 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
                                 modifier = Modifier.weight(1f)
                             )
 
-                            Text(
-                                text = trackInPoll.votes.toString(),
-                                style = MaterialTheme.typography.body1
-                            )
+                            BoxWithConstraints(
+                                modifier = Modifier.size(36.dp), // Adjust the size of the circle as needed
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            color = if (trackId == trackInPoll.track.id) Color.Green else Color(
+                                                0xFF303030
+                                            )
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(8.dp),
+                                        text = trackInPoll.votes.toString(),
+                                        style = MaterialTheme.typography.body1,
+                                        color = if (trackId == trackInPoll.track.id) Color.Black else Color.White
+                                    )
+                                }
+                            }
+
                         }
                     }
                 })
