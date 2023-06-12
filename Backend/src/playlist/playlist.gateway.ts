@@ -22,8 +22,12 @@ export class PlaylistGateway {
     return data;
   }
 
+  async sendMessage(songId: string, likes: number) {
+    return await this.server.emit('identity', { songId, likes });
+  }
+
   @SubscribeMessage('identity')
-  async identity(@MessageBody() data: number): Promise<number> {
+  async identity(@MessageBody() data) {
     return data;
   }
 }

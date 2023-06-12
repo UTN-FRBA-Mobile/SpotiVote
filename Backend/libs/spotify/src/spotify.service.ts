@@ -4,6 +4,7 @@ import { SpotifyModuleOptions } from './interfaces/spotify-module-options';
 import { HttpService } from '@nestjs/axios';
 import * as crypto from 'crypto';
 import { lastValueFrom } from 'rxjs';
+import { Playlist } from './contracts/playlist-response';
 
 @Injectable()
 export class SpotifyService {
@@ -63,11 +64,18 @@ export class SpotifyService {
     const auth = this.authorized;
     return (
       await lastValueFrom(
-        this.httpService.get(`https://api.spotify.com/v1/playlists/${id}`, {
-          headers: {
-            Authorization: `Bearer ${this.authorized}`,
+        this.httpService.get<Playlist>(
+          `https://api.spotify.com/v1/playlists/${id}`,
+          {
+            params: {
+              fields:
+                'name,description,tracks.items(track(name,href,album(name),artists(name)))',
+            },
+            headers: {
+              Authorization: `Bearer ${this.authorized}`,
+            },
           },
-        }),
+        ),
       )
     ).data;
   }
