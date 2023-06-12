@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -82,19 +84,18 @@ fun CreateRoomScreen(accessToken: String, user: User, onCreateRoom: (roomConfig:
 
     Surface(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         color = MaterialTheme.colors.background
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 16.dp)
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
+            NavBar(user = user)
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(24.dp)
-                    .align(Alignment.TopStart),
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -166,7 +167,7 @@ fun CreateRoomScreen(accessToken: String, user: User, onCreateRoom: (roomConfig:
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(shape = RoundedCornerShape(6.dp))
-                            .fillMaxHeight(0.8f)
+                            .height(400.dp)
                             .background(color = Color(0xFF404040))
                     ) {
                         LazyColumn {
@@ -178,28 +179,37 @@ fun CreateRoomScreen(accessToken: String, user: User, onCreateRoom: (roomConfig:
                         }
                     }
                 }
-            }
-            Button(
-                enabled = playlistId != "" && device != "" && name != "",
-                onClick = {
-                    onCreateRoom(
-                        RoomConfig(
-                            name = name,
-                            playlistId = playlistId,
-                            device = device
-                        )
-                    )
-                },
-                modifier = Modifier
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(100.dp))
-                    .align(Alignment.BottomCenter)
-            ) {
-                Text(
-                    text = "Next",
-                    style = MaterialTheme.typography.button,
-                    modifier = Modifier.padding(horizontal = 24.dp)
+
+                Spacer(
+                    modifier = Modifier.height(24.dp)
                 )
+
+                if (
+                    playlistId != "" &&
+                    device != "" &&
+                    name != ""
+                ) {
+                    Button(
+                        onClick = {
+                            onCreateRoom(
+                                RoomConfig(
+                                    name = name,
+                                    playlistId = playlistId,
+                                    device = device
+                                )
+                            )
+                        },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(100.dp))
+                    ) {
+                        Text(
+                            text = "Next",
+                            style = MaterialTheme.typography.button,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
+                }
             }
         }
     }
