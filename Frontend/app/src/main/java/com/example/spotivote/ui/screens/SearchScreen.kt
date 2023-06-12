@@ -1,6 +1,7 @@
 package com.example.spotivote.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,7 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
     var searchText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
+    var trackId by remember { mutableStateOf("") }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         Column(
@@ -31,7 +33,6 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             OutlinedTextField(
                 value = searchText,
                 onValueChange = {
@@ -63,6 +64,16 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .clickable(
+                                            onClick = {
+                                                trackId = track.id
+                                            }
+                                        )
+                                        .background(
+                                            color = if (trackId == track.id) Color(
+                                                0xFF303030
+                                            ) else Color.Transparent
+                                        )
                                         .padding(12.dp)
                                         .align(Alignment.CenterStart)
                                 ) {
@@ -74,7 +85,6 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
                                             .size(50.dp)
                                             .align(Alignment.CenterStart)
                                             .fillMaxSize()
-
                                     )
 
                                     Column(
@@ -84,7 +94,8 @@ fun SearchScreen(accessToken: String, onSearchTrack: () -> Unit) {
                                     ) {
                                         Text(
                                             text = track.name,
-                                            style = MaterialTheme.typography.body1
+                                            style = MaterialTheme.typography.body1,
+                                            color = if (trackId == track.id) Color.Green else Color.White
                                         )
                                         Text(
                                             text = track.artists,

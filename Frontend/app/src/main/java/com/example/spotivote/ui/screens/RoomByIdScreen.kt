@@ -1,6 +1,7 @@
 package com.example.spotivote.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,6 +33,7 @@ fun RoomByIdScreen(
     var trackCurrentlyPlaying by remember { mutableStateOf(Track()) }
     var user by remember { mutableStateOf(User()) }
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
+    var trackId by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         val response = spotifyService.getCurrentlyPlaying("Bearer $accessToken")
@@ -42,7 +44,7 @@ fun RoomByIdScreen(
             trackCurrentlyPlaying = Track(
                 id = response.body()!!.item.id,
                 name = response.body()!!.item.name,
-                artists = artists,
+                artists = artists ?: "",
                 playlistId = roomConfig.playlistId,
                 imageUri = response.body()!!.item.album.images.elementAt(0).url,
             )
@@ -84,39 +86,83 @@ fun RoomByIdScreen(
                     artists = it.track.artists.joinToString(separator = ", ") { it.name },
                     imageUri = it.track.album.images.elementAt(0).url,
                 )
-            }.slice(0..2)
+            }
         }
     }
 
     Surface(
         modifier = Modifier
-            .fillMaxSize()
-            .fillMaxHeight()
-            .verticalScroll(rememberScrollState()),
+            .fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxHeight()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .fillMaxSize()
+                .padding(bottom = 16.dp)
         ) {
-            Text(
-                text = "Room ${roomConfig.name}",
-                style = MaterialTheme.typography.h1,
-                modifier = Modifier.fillMaxWidth()
-            )
-
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp)
+                    .fillMaxHeight()
+                    .align(Alignment.TopStart)
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Playing now", style = MaterialTheme.typography.h2
+                    text = "Room ${roomConfig.name}",
+                    style = MaterialTheme.typography.h1,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp)
+                ) {
+                    Text(
+                        text = "Playing now", style = MaterialTheme.typography.h2
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(shape = RoundedCornerShape(6.dp))
+                                .background(color = Color(0xFF404040))
+                                .padding(12.dp)
+                        ) {
+                            AsyncImage(
+                                model = trackCurrentlyPlaying.imageUri,
+                                contentDescription = "Track Image",
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .size(50.dp)
+                                    .align(Alignment.CenterStart)
+                                    .fillMaxSize()
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .padding(start = 60.dp)
+                                    .align(Alignment.CenterStart)
+                            ) {
+                                Text(
+                                    text = trackCurrentlyPlaying.name,
+                                    style = MaterialTheme.typography.body1
+                                )
+                                Text(
+                                    text = trackCurrentlyPlaying.artists,
+                                    style = MaterialTheme.typography.body2,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 Column {
+                    Text(text = "Added by", style = MaterialTheme.typography.h6)
+                    Spacer(modifier = Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -125,10 +171,10 @@ fun RoomByIdScreen(
                             .padding(12.dp)
                     ) {
                         AsyncImage(
-                            model = trackCurrentlyPlaying.imageUri,
-                            contentDescription = "Track Image",
+                            model = user.imageUri,
+                            contentDescription = "User Image",
                             modifier = Modifier
-                                .clip(RoundedCornerShape(2.dp))
+                                .clip(CircleShape)
                                 .size(50.dp)
                                 .align(Alignment.CenterStart)
                                 .fillMaxSize()
@@ -139,113 +185,82 @@ fun RoomByIdScreen(
                                 .align(Alignment.CenterStart)
                         ) {
                             Text(
-                                text = trackCurrentlyPlaying.name,
-                                style = MaterialTheme.typography.body1
-                            )
-                            Text(
-                                text = trackCurrentlyPlaying.artists,
-                                style = MaterialTheme.typography.body2,
-                                color = Color.Gray
+                                text = user.displayName, style = MaterialTheme.typography.body1
                             )
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Column {
-                Text(text = "Added by", style = MaterialTheme.typography.h6)
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(6.dp))
-                        .background(color = Color(0xFF404040))
-                        .padding(12.dp)
+                Column(
+                    modifier = Modifier.padding(top = 12.dp)
                 ) {
-                    AsyncImage(
-                        model = user.imageUri,
-                        contentDescription = "User Image",
+                    Text(text = "Vote next track", style = MaterialTheme.typography.h2)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .size(50.dp)
-                            .align(Alignment.CenterStart)
-                            .fillMaxSize()
-                    )
-                    Column(
-                        modifier = Modifier
-                            .padding(start = 60.dp)
-                            .align(Alignment.CenterStart)
+                            .clip(shape = RoundedCornerShape(6.dp))
+                            .fillMaxHeight(0.85f)
+                            .background(color = Color(0xFF404040))
                     ) {
-                        Text(
-                            text = user.displayName, style = MaterialTheme.typography.body1
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Column(
-                modifier = Modifier.padding(top = 12.dp)
-            ) {
-                Text(text = "Vote next track", style = MaterialTheme.typography.h2)
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .clip(shape = RoundedCornerShape(6.dp))
-                        .background(color = Color(0xFF404040))
-                ) {
-                    LazyColumn(modifier = Modifier.height(300.dp)) {
-                        items(items = tracks, itemContent = { track ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp)
-                                    .align(Alignment.CenterStart)
+                        LazyColumn {
+                            items(items = tracks, itemContent = { track ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable(
+                                            onClick = {
+                                                trackId = track.id
+                                            }
+                                        )
+                                        .background(
+                                            color = if (trackId == track.id) Color(
+                                                0xFF303030
+                                            ) else Color.Transparent
+                                        )
+                                        .padding(12.dp)
 //                                    .clickable(onClick = { playTrack(track.id) })
-                            ) {
-                                AsyncImage(
-                                    model = track.imageUri,
-                                    contentDescription = "Playlist Image",
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(2.dp))
-                                        .size(50.dp)
-                                        .align(Alignment.CenterStart)
-                                        .fillMaxSize()
-
-                                )
-
-                                Column(
-                                    modifier = Modifier
-                                        .padding(start = 60.dp)
-                                        .align(Alignment.CenterStart)
                                 ) {
-                                    Text(
-                                        text = track.name, style = MaterialTheme.typography.body1
+                                    AsyncImage(
+                                        model = track.imageUri,
+                                        contentDescription = "Playlist Image",
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .size(50.dp)
+                                            .align(Alignment.CenterStart)
+                                            .fillMaxSize()
                                     )
-                                    Text(
-                                        text = track.artists,
-                                        style = MaterialTheme.typography.body2,
-                                        color = Color.Gray
-                                    )
+
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(start = 60.dp)
+                                            .align(Alignment.CenterStart)
+                                    ) {
+                                        Text(
+                                            text = track.name,
+                                            style = MaterialTheme.typography.body1,
+                                            color = if (trackId == track.id) Color.Green else Color.White
+                                        )
+                                        Text(
+                                            text = track.artists,
+                                            style = MaterialTheme.typography.body2,
+                                            color = Color.Gray
+                                        )
+                                    }
                                 }
-                            }
-                        })
+                            })
+                        }
                     }
                 }
             }
-
-            Spacer(
-                modifier = Modifier.height(34.dp)
-            )
 
             Button(
                 onClick = { onGoToSuggestTrack() },
                 modifier = Modifier
                     .height(48.dp)
                     .clip(RoundedCornerShape(100.dp))
+                    .align(Alignment.BottomCenter)
             ) {
                 Text(
                     text = "Suggest Track",

@@ -36,14 +36,20 @@ fun DeviceItem(device: Device, onClick: () -> Unit, selected: Boolean = false) {
             Text(
                 text = deviceTypeIcon(device.type),
                 style = MaterialTheme.typography.h2,
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
+                color = if (selected) Color.Green else Color.Gray
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = device.name, style = MaterialTheme.typography.body2)
+        Text(
+            text = device.name,
+            style = MaterialTheme.typography.body2,
+            color = if (selected) Color.Green else Color.Gray
+        )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
-            text = deviceTypeName(device.type), style = MaterialTheme.typography.caption
+            text = deviceTypeName(device.type),
+            style = MaterialTheme.typography.caption,
         )
     }
 }

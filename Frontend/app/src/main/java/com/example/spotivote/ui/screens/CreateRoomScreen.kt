@@ -82,127 +82,124 @@ fun CreateRoomScreen(accessToken: String, onCreateRoom: (roomConfig: RoomConfig)
 
     Surface(
         modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxHeight()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .fillMaxSize()
+                .padding(bottom = 16.dp)
         ) {
-            Text(
-                text = "Create Room",
-                style = MaterialTheme.typography.h1,
-                modifier = Modifier.fillMaxWidth()
-            )
-
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp)
+                    .fillMaxHeight()
+                    .padding(24.dp)
+                    .align(Alignment.TopStart),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Room name", style = MaterialTheme.typography.h2
+                    text = "Create Room",
+                    style = MaterialTheme.typography.h1,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(text = "Enter room name") },
-                    placeholder = { Text(text = "Lorem, ipsum dolor sit amet") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                )
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Column {
-                Text(text = "Your devices", style = MaterialTheme.typography.h2)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Select your device through which the songs will be played",
-                    style = MaterialTheme.typography.body1
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(6.dp))
-                        .background(color = Color(0xFF404040))
-                        .padding(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        devices.forEach { sDevice ->
-                            DeviceItem(device = sDevice, onClick = {
-                                device = sDevice.id
-                            }, selected = device == sDevice.id)
-                            Spacer(modifier = Modifier.width(16.dp))
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Column {
-                Text(text = "Your playlists", style = MaterialTheme.typography.h2)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Select your playlist you want to play initially",
-                    style = MaterialTheme.typography.body1
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(6.dp))
-                        .height(400.dp)
-                        .background(color = Color(0xFF404040))
-                ) {
-                    LazyColumn {
-                        items(items = playlists) { playlist ->
-                            PlaylistRowItem(playlist = playlist, onClick = {
-                                playlistId = playlist.id
-                            }, selected = playlistId == playlist.id)
-                        }
-                    }
-                }
-            }
-
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
-
-            if (
-                playlistId != "" &&
-                device != "" &&
-                name != ""
-            ) {
-                Button(
-                    onClick = {
-                        onCreateRoom(
-                            RoomConfig(
-                                name = name,
-                                playlistId = playlistId,
-                                device = device
-                            )
-                        )
-                    },
-                    modifier = Modifier
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(100.dp))
+                        .padding(top = 24.dp)
                 ) {
                     Text(
-                        text = "Next",
-                        style = MaterialTheme.typography.button,
-                        modifier = Modifier.padding(horizontal = 24.dp)
+                        text = "Room name", style = MaterialTheme.typography.h2
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text(text = "Enter room name") },
+                        placeholder = { Text(text = "Room X") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Column {
+                    Text(text = "Your devices", style = MaterialTheme.typography.h2)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Select your device through which the songs will be played",
+                        style = MaterialTheme.typography.body1
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(shape = RoundedCornerShape(6.dp))
+                            .background(color = Color(0xFF404040))
+                            .padding(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            devices.forEach { sDevice ->
+                                DeviceItem(device = sDevice, onClick = {
+                                    device = sDevice.id
+                                }, selected = device == sDevice.id)
+                                Spacer(modifier = Modifier.width(16.dp))
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Column {
+                    Text(text = "Your playlists", style = MaterialTheme.typography.h2)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Select your playlist you want to play initially",
+                        style = MaterialTheme.typography.body1
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(shape = RoundedCornerShape(6.dp))
+                            .fillMaxHeight(0.8f)
+                            .background(color = Color(0xFF404040))
+                    ) {
+                        LazyColumn {
+                            items(items = playlists) { playlist ->
+                                PlaylistRowItem(playlist = playlist, onClick = {
+                                    playlistId = playlist.id
+                                }, selected = playlistId == playlist.id)
+                            }
+                        }
+                    }
+                }
+            }
+            Button(
+                enabled = playlistId != "" && device != "" && name != "",
+                onClick = {
+                    onCreateRoom(
+                        RoomConfig(
+                            name = name,
+                            playlistId = playlistId,
+                            device = device
+                        )
+                    )
+                },
+                modifier = Modifier
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(100.dp))
+                    .align(Alignment.BottomCenter)
+            ) {
+                Text(
+                    text = "Next",
+                    style = MaterialTheme.typography.button,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
             }
         }
     }
