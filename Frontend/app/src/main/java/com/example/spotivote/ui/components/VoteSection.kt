@@ -54,13 +54,14 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
 
     val client = OkHttpClient()
     val socketUrl =
-        "ws://localhost:8055"
+        "wss://s9157.nyc1.piesocket.com/v3/1?api_key=SqxisaikNnHg4X7o3DxtIm7sAPCz6ho8Wu9Z76PF&notify_self=1"
     val request: Request = Request.Builder().url(socketUrl).build()
 
     val listener = WebSocketListener(
         Callbacks(
             thumbsDown = {
                 println("Thumbs down")
+                tracks[0].votes = (tracks[0].votes - 1).coerceAtLeast(0)
             },
             thumbsUp = {
                 println("Thumbs up")
@@ -69,6 +70,7 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
         )
     )
     val ws = client.newWebSocket(request, listener)
+
 
     Column(
         modifier = Modifier.padding(top = 12.dp)

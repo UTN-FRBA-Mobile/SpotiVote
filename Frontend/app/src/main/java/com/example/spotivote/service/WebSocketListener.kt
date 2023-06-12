@@ -20,7 +20,10 @@ class WebSocketListener(private val callbacks: Callbacks) : WebSocketListener() 
     override fun onMessage(webSocket: WebSocket, text: String) {
         super.onMessage(webSocket, text)
         Log.i("WebSocketListener", text)
-        callbacks.thumbsUp(text)
+        when (text) {
+            "thumbsUp" -> callbacks.thumbsUp(text)
+            "thumbsDown" -> callbacks.thumbsDown(text)
+        }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
