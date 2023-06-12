@@ -26,7 +26,6 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
     var trackId by remember { mutableStateOf("") }
 
-
     // cambiar para que vaya a buscar las que se pueden votar ahora...
     LaunchedEffect(Unit) {
         val playlist =
