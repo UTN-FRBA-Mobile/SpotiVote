@@ -25,7 +25,6 @@ import com.example.spotivote.ui.components.NavBar
 import com.example.spotivote.ui.components.PlaylistRowItem
 import java.util.*
 
-
 fun mapToDeviceType(type: String): DeviceType {
     return when (type.lowercase(Locale.getDefault())) {
         "smartphone" -> DeviceType.SMARTPHONE

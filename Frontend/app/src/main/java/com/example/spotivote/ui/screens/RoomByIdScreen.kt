@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.example.spotivote.ui.components.CurrentlyPlaying
 import com.example.spotivote.ui.components.VoteSection
 
-
 @Composable
 fun RoomByIdScreen(
     accessToken: String, roomConfig: RoomConfig, onGoToSuggestTrack: () -> Unit

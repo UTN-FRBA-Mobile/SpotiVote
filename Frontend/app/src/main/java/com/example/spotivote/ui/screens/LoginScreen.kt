@@ -22,7 +22,6 @@ import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 
-
 val CLIENT_ID = "4240d4ecfccb4c6eaa9f064ead594324"
 val REDIRECT_URI = "com.example.spotivote://callback"
 
