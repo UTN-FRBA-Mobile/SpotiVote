@@ -27,7 +27,7 @@ import java.net.HttpURLConnection
 
 @Composable
 fun RoomByIdScreen(
-    accessToken: String, roomName: String, playlistId: String, onGoToSuggestTrack: () -> Unit
+    accessToken: String, roomConfig: RoomConfig, onGoToSuggestTrack: () -> Unit
 ) {
     var trackCurrentlyPlaying by remember { mutableStateOf(Track()) }
     var user by remember { mutableStateOf(User()) }
@@ -43,14 +43,14 @@ fun RoomByIdScreen(
                 id = response.body()!!.item.id,
                 name = response.body()!!.item.name,
                 artists = artists,
-                playlistId = playlistId,
+                playlistId = roomConfig.playlistId,
                 imageUri = response.body()!!.item.album.images.elementAt(0).url,
             )
 
 
-            if (playlistId.isNotEmpty()) {
+            if (roomConfig.playlistId.isNotEmpty()) {
                 val tracksResponse = spotifyService.getTracksByPlaylistId(
-                    playlistId, "Bearer $accessToken"
+                    roomConfig.playlistId, "Bearer $accessToken"
                 )
                 if (tracksResponse.code() != HttpURLConnection.HTTP_OK) return@LaunchedEffect
                 val track =
@@ -72,7 +72,7 @@ fun RoomByIdScreen(
             }
 
             val playlistResponse =
-                spotifyService.getTracksByPlaylistId(playlistId, "Bearer $accessToken")
+                spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
 
             if (playlistResponse.code() != HttpURLConnection.HTTP_OK) return@LaunchedEffect
             val playlist = playlistResponse.body()!!
@@ -102,7 +102,7 @@ fun RoomByIdScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Room $roomName",
+                text = "Room ${roomConfig.name}",
                 style = MaterialTheme.typography.h1,
                 modifier = Modifier.fillMaxWidth()
             )
