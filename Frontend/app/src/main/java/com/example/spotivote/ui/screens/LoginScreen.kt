@@ -2,7 +2,6 @@ package com.example.spotivote.ui.screens
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,8 +41,8 @@ private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLaunc
             "user-top-read",
             "playlist-modify-public",
             "playlist-modify-private"
-    )
         )
+    )
     val request = builder.build()
 
     val intent = AuthorizationClient.createLoginActivityIntent(

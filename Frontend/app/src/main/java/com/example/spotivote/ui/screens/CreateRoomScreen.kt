@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,9 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.Device
 import com.example.spotivote.model.DeviceType
+import com.example.spotivote.model.User
 import com.example.spotivote.service.dto.PlaylistItem
 import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.components.DeviceItem
+import com.example.spotivote.ui.components.NavBar
 import com.example.spotivote.ui.components.PlaylistRowItem
 import java.util.*
 
@@ -59,11 +59,11 @@ data class RoomConfig(
 )
 
 @Composable
-fun CreateRoomScreen(accessToken: String, onCreateRoom: (roomConfig: RoomConfig) -> Unit) {
+fun CreateRoomScreen(accessToken: String, user: User, onCreateRoom: (roomConfig: RoomConfig) -> Unit) {
     var playlists by remember { mutableStateOf<List<PlaylistItem>>(emptyList()) }
     var devices by remember { mutableStateOf<List<Device>>(emptyList()) }
 
-    var name by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("Test") }
     var playlistId by remember { mutableStateOf("") }
     var device by remember { mutableStateOf("") }
 

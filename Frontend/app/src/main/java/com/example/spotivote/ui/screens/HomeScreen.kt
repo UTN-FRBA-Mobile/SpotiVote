@@ -23,49 +23,50 @@ fun HomeScreen(
 ) {
     // Crear sala o unirse a una
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 24.dp),
+            modifier = Modifier.fillMaxSize()
         ) {
             NavBar(user = user)
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = {
-                    // ir a crear sala
-                    onNavigateToCreateRoom()
-                },
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(100.dp))
+                    .fillMaxSize()
+                    .padding(vertical = 24.dp),
             ) {
-                Text(
-                    text = "Create room",
-                    style = MaterialTheme.typography.button,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-            }
+                Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = {
+                        // ir a crear sala
+                        onNavigateToCreateRoom()
+                    }, modifier = Modifier
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(100.dp))
+                ) {
+                    Text(
+                        text = "Create room",
+                        style = MaterialTheme.typography.button,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
 
-            // TODO: poner estilos de botón secundario
-            Button(
-                onClick = {
-                    // ir a scannear QR
-                    onNavigateToJoinRoom()
-                },
-                modifier = Modifier
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(100.dp))
-            ) {
-                Text(
-                    text = "Scann QR",
-                    style = MaterialTheme.typography.button,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // TODO: poner estilos de botón secundario
+                Button(
+                    onClick = {
+                        // ir a scannear QR
+                        onNavigateToJoinRoom()
+                    }, modifier = Modifier
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(100.dp))
+                ) {
+                    Text(
+                        text = "Scann QR",
+                        style = MaterialTheme.typography.button,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
             }
         }
     }
