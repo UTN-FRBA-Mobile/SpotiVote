@@ -28,11 +28,11 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
 
     // cambiar para que vaya a buscar las que se pueden votar ahora...
     LaunchedEffect(Unit) {
+        //val playlist =
+        //    spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
+
         val playlist =
-            spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
-        // TODO: Probar testear la API backend de localhost
-        // val playlist =
-        //    localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
+             localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
 
         tracks = playlist.items.map { it ->
             Track(

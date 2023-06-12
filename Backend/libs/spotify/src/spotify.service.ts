@@ -63,7 +63,7 @@ export class SpotifyService {
     const auth = this.authorized;
     return (
       await lastValueFrom(
-        this.httpService.get(`https://api.spotify.com/v1/playlists/${id}`, {
+        this.httpService.get(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
           headers: {
             Authorization: `Bearer ${this.authorized}`,
           },
