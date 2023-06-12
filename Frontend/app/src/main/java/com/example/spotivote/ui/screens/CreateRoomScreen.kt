@@ -25,7 +25,6 @@ import com.example.spotivote.ui.components.NavBar
 import com.example.spotivote.ui.components.PlaylistRowItem
 import java.util.*
 
-
 fun mapToDeviceType(type: String): DeviceType {
     return when (type.lowercase(Locale.getDefault())) {
         "smartphone" -> DeviceType.SMARTPHONE
@@ -117,7 +116,7 @@ fun CreateRoomScreen(accessToken: String, user: User, onCreateRoom: (roomConfig:
                         value = name,
                         onValueChange = { name = it },
                         label = { Text(text = "Enter room name") },
-                        placeholder = { Text(text = "Lorem, ipsum dolor sit amet") },
+                        placeholder = { Text(text = "Room X") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                     )

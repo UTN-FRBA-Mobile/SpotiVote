@@ -17,18 +17,22 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.spotivote.model.Track
 import com.example.spotivote.service.spotifyService
+import com.example.spotivote.service.localService
 import com.example.spotivote.ui.screens.RoomConfig
 
 
 @Composable
 fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
-
+    var trackId by remember { mutableStateOf("") }
 
     // cambiar para que vaya a buscar las que se pueden votar ahora...
     LaunchedEffect(Unit) {
         val playlist =
             spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
+        // TODO: Probar testear la API backend de localhost
+        // val playlist =
+        //    localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
 
         tracks = playlist.items.map { it ->
             Track(
@@ -37,7 +41,7 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
                 artists = it.track.artists.joinToString(separator = ", ") { it.name },
                 imageUri = it.track.album.images.elementAt(0).url,
             )
-        }.slice(0..2)
+        }
     }
 
     Column(
@@ -49,19 +53,26 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
             modifier = Modifier
                 .clip(shape = RoundedCornerShape(6.dp))
                 .background(color = Color(0xFF404040))
+                .fillMaxHeight(0.76f)
         ) {
-            LazyColumn(
-                modifier = Modifier.height((tracks.size * 74).dp)
-            ) {
+            LazyColumn {
                 items(items = tracks, itemContent = { track ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp)
                             .align(Alignment.CenterStart)
-                            .clickable(onClick = {
-                                // vote
-                            })
+                            .clickable(
+                                onClick = {
+                                    // vote
+                                    trackId = track.id
+                                }
+                            )
+                            .background(
+                                color = if (trackId == track.id) Color(
+                                    0xFF303030
+                                ) else Color.Transparent
+                            )
                     ) {
                         Row() {
                             AsyncImage(
@@ -71,7 +82,6 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
                                     .clip(RoundedCornerShape(2.dp))
                                     .size(50.dp)
                                     .fillMaxSize()
-
                             )
                             Spacer(
                                 modifier = Modifier.width(12.dp)
@@ -79,7 +89,9 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
 
                             Column() {
                                 Text(
-                                    text = track.name, style = MaterialTheme.typography.body1
+                                    text = track.name,
+                                    style = MaterialTheme.typography.body1,
+                                    color = if (trackId == track.id) Color.Green else Color.White
                                 )
                                 Text(
                                     text = track.artists,

@@ -1,9 +1,7 @@
 package com.example.spotivote.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -24,8 +22,7 @@ fun RoomByIdScreen(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .fillMaxHeight()
-            .verticalScroll(rememberScrollState()),
+            .fillMaxHeight(),
         color = MaterialTheme.colors.background
     ) {
         Column(

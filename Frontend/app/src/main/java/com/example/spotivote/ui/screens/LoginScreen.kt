@@ -22,8 +22,7 @@ import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 
-
-val CLIENT_ID = "772ae91b781a4f99896817d6e7b9c33f"
+val CLIENT_ID = "4240d4ecfccb4c6eaa9f064ead594324"
 val REDIRECT_URI = "com.example.spotivote://callback"
 
 private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
@@ -38,7 +37,9 @@ private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLaunc
             "user-modify-playback-state",
             "user-read-currently-playing",
             "playlist-read-private",
-            "user-top-read"
+            "user-top-read",
+            "playlist-modify-public",
+            "playlist-modify-private"
         )
     )
     val request = builder.build()
@@ -72,7 +73,7 @@ fun LoginScreen(activity: Activity, onLogin: (String) -> Unit) {
             Text("Spotivote", style = MaterialTheme.typography.h2)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Lorem ipsum dolor sit amet consectetur",
+                text = "Music voting for everyone",
                 style = MaterialTheme.typography.body1
             )
 

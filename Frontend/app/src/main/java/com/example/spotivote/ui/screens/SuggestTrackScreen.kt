@@ -1,8 +1,5 @@
 package com.example.spotivote.ui.screens
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,26 +25,25 @@ import com.example.spotivote.service.spotifyService
 @Composable
 fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
+    var trackId by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         val response = spotifyService.getUserTopItems("tracks", 10, "Bearer $accessToken")
 
-        tracks = response.items.map { it ->
-            val artists: String = it.artists.joinToString(separator = ", ") { it.name }
+        tracks = response.items.map { track ->
+            val artists: String = track.artists.joinToString(separator = ", ") { track.name }
             Track(
-                id = it.id,
-                name = it.name,
+                id = track.id,
+                name = track.name,
                 artists = artists,
-                imageUri = it.album.images.elementAt(0).url,
+                imageUri = track.album.images.elementAt(0).url,
             )
-
         }
     }
 
     Surface(
         modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
         Column(
@@ -78,13 +74,22 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
                                 )
                             )
                             .fillMaxHeight(0.8f)
-                            .height(400.dp)
                             .background(color = Color(0xFF404040))
                     ) {
                         LazyColumn {
                             items(items = tracks, itemContent = { track ->
                                 Box(
                                     modifier = Modifier
+                                        .clickable(
+                                            onClick = {
+                                                trackId = track.id
+                                            }
+                                        )
+                                        .background(
+                                            color = if (trackId == track.id) Color(
+                                                0xFF303030
+                                            ) else Color.Transparent
+                                        )
                                         .fillMaxWidth()
                                         .padding(12.dp)
                                         .align(Alignment.CenterStart)
@@ -97,7 +102,6 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
                                             .size(50.dp)
                                             .align(Alignment.CenterStart)
                                             .fillMaxSize()
-
                                     )
 
                                     Column(
@@ -107,7 +111,9 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
                                     ) {
                                         Text(
                                             text = track.name,
-                                            style = MaterialTheme.typography.body1
+                                            style = MaterialTheme.typography.body1,
+                                            color = if (trackId == track.id) Color.Green else Color.White
+
                                         )
                                         Text(
                                             text = track.artists,
@@ -144,7 +150,6 @@ fun SuggestTrackScreen(accessToken: String, onSuggestTrack: () -> Unit) {
                 modifier = Modifier
                     .defaultMinSize(minHeight = 24.dp)
             )
-
             Button(
                 onClick = {}, modifier = Modifier
                     .height(48.dp)

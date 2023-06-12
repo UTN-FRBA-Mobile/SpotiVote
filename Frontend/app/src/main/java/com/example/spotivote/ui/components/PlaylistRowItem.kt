@@ -54,6 +54,7 @@ fun PlaylistRowItem(playlist: PlaylistItem, onClick: () -> Unit, selected: Boole
             Text(
                 text = playlist.name,
                 style = MaterialTheme.typography.body1,
+                color = if (selected) Color.Green else Color.White
             )
             Text(
                 text = "${playlist.tracks.total} song${(if (playlist.tracks.total != 1) "s" else "")}",
