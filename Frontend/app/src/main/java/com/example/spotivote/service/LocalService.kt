@@ -1,6 +1,6 @@
 package com.example.spotivote.service
 
-import com.example.spotivote.service.dto.*
+import com.example.spotivote.service.dto.local.*
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -21,5 +21,5 @@ interface LocalService {
     suspend fun getTracksByPlaylistId(
         @Path("id") playlistId: String,
         @Header("access_token") authorization: String,
-    ): PlaylistTracksResponse
+    ): PlaylistResponse
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.spotivote.model.Track
+import com.example.spotivote.service.dto.local.*
 import com.example.spotivote.service.spotifyService
 import com.example.spotivote.service.localService
 import com.example.spotivote.ui.screens.RoomConfig
@@ -28,18 +29,18 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
 
     // cambiar para que vaya a buscar las que se pueden votar ahora...
     LaunchedEffect(Unit) {
-        //val playlist =
+        // val playlist =
         //    spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
 
-        val playlist =
+        val playlistRes =
              localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
 
-        tracks = playlist.items.map { it ->
+        tracks = playlistRes.songs.map { it ->
             Track(
-                id = it.track.id,
-                name = it.track.name,
-                artists = it.track.artists.joinToString(separator = ", ") { it.name },
-                imageUri = it.track.album.images.elementAt(0).url,
+                id = it._id,
+                name = it.track,
+                artists = it.artist,
+                imageUri = playlistRes.playlist.albumImageUri,
             )
         }
     }

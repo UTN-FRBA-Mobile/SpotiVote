@@ -6,10 +6,16 @@ export type Document = HydratedDocument<Playlist>;
 @Schema()
 export class Playlist {
   @Prop()
+  id: string;
+
+  @Prop()
   name: string;
 
   @Prop()
-  likes: number;
+  description: string;
+
+  @Prop()
+  albumImageUri: string;
 }
 
 export const PlaylistSchema = SchemaFactory.createForClass(Playlist);
