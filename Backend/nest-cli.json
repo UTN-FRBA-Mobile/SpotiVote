@@ -3,6 +3,18 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true
+  },
+  "projects": {
+    "spotify": {
+      "type": "library",
+      "root": "libs/spotify",
+      "entryFile": "index",
+      "sourceRoot": "libs/spotify/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/spotify/tsconfig.lib.json"
+      }
+    }
   }
 }

@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
-import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Playlist } from './schemas/playlist.schema';
 import { Model } from 'mongoose';
+import { SpotifyService } from '@app/spotify';
 
 @Injectable()
 export class PlaylistService {
   constructor(
     @InjectModel(Playlist.name) private playlistModel: Model<Playlist>,
+    private spotifyService: SpotifyService,
   ) {}
 
   async create(createCatDto: CreatePlaylistDto): Promise<Playlist> {
@@ -16,7 +17,12 @@ export class PlaylistService {
     return createdPlaylist.save();
   }
 
-  async findAll(): Promise<Playlist[]> {
-    return this.playlistModel.find().exec();
+  async findAll() {
+    return;
+  }
+
+  public async findById(id: string) {
+    const value = await this.spotifyService.getPlaylists(id);
+    return value;
   }
 }
