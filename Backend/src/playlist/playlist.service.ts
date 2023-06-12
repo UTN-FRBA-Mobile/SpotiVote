@@ -27,11 +27,14 @@ export class PlaylistService {
 
   public async findById(id: string) {
     const playlistResponse = await this.spotifyService.getPlaylists(id);
+    
+    const images = playlistResponse.tracks.items[0].track.album.images;
 
     const playlist = await this.playlistModel.create({
       name: playlistResponse.name,
       id,
       description: playlistResponse.description,
+      albumImageUri: (images && images.length > 0) ? images[0].url : "",
     });
     const mapSongs = playlistResponse.tracks.items.map(({ track }) => ({
       track: track.name,

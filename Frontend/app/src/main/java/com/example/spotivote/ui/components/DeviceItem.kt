@@ -44,7 +44,7 @@ fun DeviceItem(device: Device, onClick: () -> Unit, selected: Boolean = false) {
         Text(
             text = device.name,
             style = MaterialTheme.typography.body2,
-            color = if (selected) Color.Green else Color.Gray
+            color = if (selected) Color.Green else Color.White
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(

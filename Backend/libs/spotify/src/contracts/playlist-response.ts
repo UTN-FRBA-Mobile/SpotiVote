@@ -2,6 +2,7 @@ export interface Playlist {
   description: string;
   name: string;
   tracks: Tracks;
+  albumImageUri: string;
 }
 
 export interface Tracks {
@@ -21,4 +22,9 @@ export interface Track {
 
 export interface Album {
   name: string;
+  images: AlbumImage[];
+}
+
+export interface AlbumImage {
+  url: string;
 }

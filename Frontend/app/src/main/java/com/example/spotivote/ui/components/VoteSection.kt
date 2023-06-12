@@ -19,6 +19,7 @@ import coil.compose.AsyncImage
 import com.example.spotivote.model.Track
 import com.example.spotivote.service.Callbacks
 import com.example.spotivote.service.WebSocketListener
+import com.example.spotivote.service.localService
 import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.RoomConfig
 import okhttp3.OkHttpClient
@@ -34,19 +35,19 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
 
     // cambiar para que vaya a buscar las que se pueden votar ahora...
     LaunchedEffect(Unit) {
-        val playlist =
-            spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
-        // TODO: Probar testear la API backend de localhost
         // val playlist =
-        //    localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
+        //    spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
 
-        tracks = playlist.items.map { it ->
+        val playlistRes =
+            localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
+
+        tracks = playlistRes.songs.map { it ->
             TrackInPoll(
                 Track(
-                    id = it.track.id,
-                    name = it.track.name,
-                    artists = it.track.artists.joinToString(separator = ", ") { it.name },
-                    imageUri = it.track.album.images.elementAt(0).url,
+                    id = it._id,
+                    name = it.track,
+                    artists = it.artist,
+                    imageUri = playlistRes.playlist.albumImageUri
                 ), 0
             )
         }

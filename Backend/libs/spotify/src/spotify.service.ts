@@ -69,7 +69,7 @@ export class SpotifyService {
           {
             params: {
               fields:
-                'name,description,tracks.items(track(name,href,album(name),artists(name)))',
+                'name,description,tracks.items(track(name,href,album(name),artists(name),album(images)))',
             },
             headers: {
               Authorization: `Bearer ${this.authorized}`,
