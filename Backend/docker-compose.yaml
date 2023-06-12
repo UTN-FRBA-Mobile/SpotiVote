@@ -11,9 +11,10 @@ services:
     volumes:
       - './src/:/workspace/src'
       - './node_modules:/workspace/node_modules'
+      - './libs:/workspace/libs'
     command: "npm run start:debug"
-    environment:
-      - MONGODB_URI=mongodb://root:123456@mongodb:27017/
+    env_file:
+      - .env
     ports:
       - 4001:3000
       - 9001:9229
