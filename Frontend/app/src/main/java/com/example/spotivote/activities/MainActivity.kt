@@ -107,7 +107,7 @@ fun App() {
             })
         }
         composable("suggest-track") {
-            SuggestTrackScreen(accessToken, onSuggestTrack = {
+            SuggestTrackScreen(accessToken, user, onSuggestTrack = {
                 run {
                     navController.navigate("search")
                 }

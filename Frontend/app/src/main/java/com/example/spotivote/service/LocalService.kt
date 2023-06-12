@@ -10,10 +10,10 @@ import java.util.concurrent.TimeUnit
 
 val localhOkHttpClient = OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS).build()
 
-val localRetrofit = Retrofit.Builder().baseUrl("http://localhost:4001/")
+val localRetrofit = Retrofit.Builder().baseUrl("http://10.0.2.2:4001/")
     .addConverterFactory(GsonConverterFactory.create()).client(localhOkHttpClient).build()
 
-val localService = localRetrofit.create(SpotifyService::class.java)
+val localService = localRetrofit.create(LocalService::class.java)
 
 interface LocalService {
     @GET("/playlist/{playlist_id}")

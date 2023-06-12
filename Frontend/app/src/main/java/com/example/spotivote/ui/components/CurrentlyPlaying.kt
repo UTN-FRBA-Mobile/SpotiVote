@@ -4,12 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.spotivote.model.Track
@@ -105,7 +108,9 @@ fun CurrentlyPlaying(
                     .background(color = Color(0xFF404040))
                     .padding(12.dp)
             ) {
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     AsyncImage(
                         model = user.imageUri,
                         contentDescription = "User Image",
@@ -114,12 +119,46 @@ fun CurrentlyPlaying(
                             .size(36.dp)
                             .fillMaxSize()
                     )
-                    Spacer(
-                        modifier = Modifier.width(12.dp)
-                    )
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = user.displayName, style = MaterialTheme.typography.body1
                     )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Box(
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Button(
+                            onClick = { /* Button 2 clicked */ },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                text = "\uD83D\uDC4E",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.size(24.dp) // Adjust the size of the emoji as needed
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Box(
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Button(
+                            onClick = { /* Button 1 clicked */ },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                text = "\uD83D\uDC4D",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.size(24.dp) // Adjust the size of the emoji as needed
+                            )
+                        }
+                    }
                 }
             }
         }
