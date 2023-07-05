@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { PlaylistService } from './playlist.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { CreateDeviceTokenDto } from './dto/create-device-token.dto';
 
 @Controller('playlist')
 export class PlaylistController {
@@ -17,6 +18,11 @@ export class PlaylistController {
   @Post()
   create(@Body() createPlaylistDto: CreatePlaylistDto) {
     return this.playlistService.create(createPlaylistDto);
+  }
+
+  @Post('/deviceToken')
+  createDeviceToken(@Body() createDeviceTokenDto: CreateDeviceTokenDto) {
+    return this.playlistService.createDeviceToken(createDeviceTokenDto);
   }
 
   @Get()

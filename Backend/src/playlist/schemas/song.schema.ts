@@ -1,6 +1,5 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Playlist } from './playlist.schema';
 
 export type Document = HydratedDocument<Song>;
 

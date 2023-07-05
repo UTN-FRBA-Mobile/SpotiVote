@@ -16,10 +16,17 @@ val localRetrofit = Retrofit.Builder().baseUrl("http://$localIpV4:4001/")
 
 val localService = localRetrofit.create(LocalService::class.java)
 
+data class DeviceTokenRequest(val deviceToken: String, val userId: String)
+
 interface LocalService {
     @GET("playlist/{id}")
     suspend fun getTracksByPlaylistId(
         @Path("id") playlistId: String,
         @Header("access_token") authorization: String,
     ): PlaylistResponse
+
+    @POST("/deviceToken")
+    suspend fun postDeviceToken(
+        @Body body: DeviceTokenRequest,
+    )
 }
