@@ -1,7 +1,10 @@
 package com.example.spotivote.activities
 
 import android.app.Activity
+import android.content.ContentValues
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
@@ -10,9 +13,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
+import com.example.spotivote.service.DeviceTokenRequest
+import com.example.spotivote.service.firebase.*
+import com.example.spotivote.service.localService
 import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.*
 import com.example.spotivote.ui.theme.SpotivoteTheme
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +30,9 @@ class MainActivity : ComponentActivity() {
                 App()
             }
         }
+
+        // reloadButton.setOnClickListener { setFirebaseTokenInView() }
+        // subscribeButton.setOnClickListener { subscribeToTopic() }
     }
 }
 
@@ -30,33 +41,38 @@ class MainActivity : ComponentActivity() {
 fun App() {
     val navController = rememberNavController()
     val activity = LocalContext.current as Activity
-
     var accessToken by remember { mutableStateOf("") }
     var roomConfig by remember {
-        mutableStateOf(
-            RoomConfig("", "", "")
-        )
+        mutableStateOf(RoomConfig("", "", "", activity))
     }
-
-    var user by remember {
-        mutableStateOf(
-            User("", "")
-        )
-    }
+    var user by remember { mutableStateOf(User("", "", "")) }
 
     suspend fun getUser() {
-        val response = spotifyService.getMe(
-            "Bearer $accessToken"
-        )
-        user = User(
-            response.display_name, response.images[0].url
-        )
+        val response = spotifyService.getMe("Bearer $accessToken")
+        user = User(response.id, response.display_name, response.images[0].url)
+    }
+
+    suspend fun registerToken(context: Context, userId: String) {
+        var token = ""
+        Firebase.messaging.token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(ContentValues.TAG, "Fetching FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+            token = task.result
+            Log.d(ContentValues.TAG, "FCM Registration token: $token")
+
+            MyPreferences.setFirebaseToken(context, token)
+        }
+        if (token.isNotEmpty()) {
+            val reqDeviceToken = DeviceTokenRequest(token, userId)
+            localService.postDeviceToken(reqDeviceToken)
+        }
     }
 
     LaunchedEffect(accessToken) {
-        if (accessToken != "") {
-            getUser()
-        }
+        if (accessToken != "") getUser()
+        registerToken(activity, user.id)
     }
 
     NavHost(navController = navController, startDestination = "login") {

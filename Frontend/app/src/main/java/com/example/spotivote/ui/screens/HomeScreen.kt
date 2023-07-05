@@ -22,6 +22,7 @@ fun HomeScreen(
     onNavigateToJoinRoom: () -> Unit,
 ) {
     // Crear sala o unirse a una
+    // TODO: Mostrar listado de mis salas
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         Column(
             modifier = Modifier.fillMaxSize()

@@ -8,12 +8,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SpotifyModuleOptions } from '@app/spotify/interfaces/spotify-module-options';
 import { PlaylistGateway } from './playlist.gateway';
 import { Song, SongSchema } from './schemas/song.schema';
+import { DeviceToken, DeviceTokenSchema } from './schemas/device-token.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Playlist.name, schema: PlaylistSchema },
       { name: Song.name, schema: SongSchema },
+      { name: DeviceToken.name, schema: DeviceTokenSchema },
     ]),
     SpotifyModule.registerAsync({
       imports: [ConfigModule],

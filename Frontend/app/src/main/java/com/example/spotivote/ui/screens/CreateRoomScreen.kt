@@ -1,5 +1,6 @@
 package com.example.spotivote.ui.screens
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.Device
 import com.example.spotivote.model.DeviceType
@@ -57,6 +59,7 @@ data class RoomConfig(
     val name: String,
     val playlistId: String,
     val device: String,
+    val context: Context,
 )
 
 @Composable
@@ -67,6 +70,8 @@ fun CreateRoomScreen(accessToken: String, user: User, onCreateRoom: (roomConfig:
     var name by remember { mutableStateOf("Test") }
     var playlistId by remember { mutableStateOf("") }
     var device by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         Log.d("CreateRoomScreen", "Access Token: $accessToken")
@@ -194,7 +199,8 @@ fun CreateRoomScreen(accessToken: String, user: User, onCreateRoom: (roomConfig:
                                 RoomConfig(
                                     name = name,
                                     playlistId = playlistId,
-                                    device = device
+                                    device = device,
+                                    context = context
                                 )
                             )
                         },

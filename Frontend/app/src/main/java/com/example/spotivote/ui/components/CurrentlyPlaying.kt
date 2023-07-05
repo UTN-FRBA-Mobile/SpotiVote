@@ -50,7 +50,7 @@ fun CurrentlyPlaying(
     // reemplazar por el usuario que agregó la canción
     LaunchedEffect(accessToken) {
         val userResponse = spotifyService.getMe("Bearer $accessToken")
-        user = User(userResponse.display_name, userResponse.images.elementAt(0).url)
+        user = User(userResponse.id, userResponse.display_name, userResponse.images.elementAt(0).url)
     }
 
     return Column(modifier = Modifier.fillMaxWidth()) {

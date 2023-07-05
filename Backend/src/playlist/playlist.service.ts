@@ -5,13 +5,16 @@ import { Playlist } from './schemas/playlist.schema';
 import { Model } from 'mongoose';
 import { SpotifyService } from '@app/spotify';
 import { Song } from './schemas/song.schema';
+import { DeviceToken } from './schemas/device-token.schema';
 import { PlaylistGateway } from './playlist.gateway';
+import { CreateDeviceTokenDto } from './dto/create-device-token.dto';
 
 @Injectable()
 export class PlaylistService {
   constructor(
     @InjectModel(Playlist.name) private playlistModel: Model<Playlist>,
     @InjectModel(Song.name) private songModel: Model<Song>,
+    @InjectModel(DeviceToken.name) private deviceTokenModel: Model<DeviceToken>,
     private spotifyService: SpotifyService,
     private playlistGateway: PlaylistGateway,
   ) {}
@@ -19,6 +22,11 @@ export class PlaylistService {
   async create(createCatDto: CreatePlaylistDto): Promise<Playlist> {
     const createdPlaylist = new this.playlistModel(createCatDto);
     return createdPlaylist.save();
+  }
+
+  async createDeviceToken(createTokenDto: CreateDeviceTokenDto): Promise<DeviceToken> {
+    const createdToken = new this.deviceTokenModel(createTokenDto);
+    return createdToken.save();
   }
 
   async findAll() {
