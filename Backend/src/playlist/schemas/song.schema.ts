@@ -20,10 +20,11 @@ export class Song {
   @Prop()
   likes: number;
 
-  @Prop({
-    required: true,
-  })
+  @Prop({ required: true })
   playlistId: string;
+
+  @Prop()
+  addedById: string;
 }
 
 export const SongSchema = SchemaFactory.createForClass(Song);

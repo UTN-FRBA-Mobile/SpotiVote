@@ -1,6 +1,12 @@
 package com.example.spotivote.service.firebase
+import android.content.ContentValues
+import android.content.Context
 import android.util.Log
+import com.example.spotivote.service.DeviceTokenRequest
+import com.example.spotivote.service.localService
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.Constants.MessageNotificationKeys.TAG
+import com.google.firebase.messaging.ktx.messaging
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +48,32 @@ interface FCMService {
     ): Response<ResponseBody>
 }
 
+fun registerToken(context: Context) {
+    Firebase.messaging.token.addOnCompleteListener { task ->
+        var token = ""
+        if (!task.isSuccessful) {
+            Log.w(ContentValues.TAG, "Fetching FCM registration token failed", task.exception)
+            return@addOnCompleteListener
+        }
+        token = task.result
+        Log.d(ContentValues.TAG, "FCM Registration token: $token")
+
+        MyPreferences.setFirebaseToken(context, token)
+    }
+}
+
+suspend fun registerTokenDB(deviceToken: String?, userId: String){
+    Log.d(ContentValues.TAG, "DeviceToken: $deviceToken")
+    if (!deviceToken.isNullOrEmpty()) {
+        val reqDeviceToken = DeviceTokenRequest(deviceToken, userId)
+        try {
+            localService.postDeviceToken(reqDeviceToken)
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Local service backend error", e)
+        }
+    }
+}
+
 fun sendNotificationToUser(deviceToken: String, message: String) {
     val apiKey = "AAAAiQfH7c0:APA91bFAhyYr1gaE1mz-1O-qZOumIuXFpBeJ756yFK5CbcJC8SjHJguKTX2h4ZxsN3HU8a4XIv9DlyQmgP3VPnFkxPje445xTij2yUFnnsAeVfM43k5Ezpa9qMbhVoIVepOot44SOpKg" // TODO: obtenerla de un .env
 
@@ -67,3 +99,5 @@ fun sendNotificationToUser(deviceToken: String, message: String) {
         }
     }
 }
+
+

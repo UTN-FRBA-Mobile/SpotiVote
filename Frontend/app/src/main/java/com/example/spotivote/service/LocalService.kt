@@ -25,7 +25,7 @@ interface LocalService {
         @Header("access_token") authorization: String,
     ): PlaylistResponse
 
-    @POST("/deviceToken")
+    @POST("playlist/deviceToken")
     suspend fun postDeviceToken(
         @Body body: DeviceTokenRequest,
     )

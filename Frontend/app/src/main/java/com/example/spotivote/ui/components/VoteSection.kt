@@ -1,5 +1,7 @@
 package com.example.spotivote.ui.components
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +22,6 @@ import com.example.spotivote.model.Track
 import com.example.spotivote.service.Callbacks
 import com.example.spotivote.service.WebSocketListener
 import com.example.spotivote.service.localService
-import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.RoomConfig
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -37,19 +38,22 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
     LaunchedEffect(Unit) {
         // val playlist =
         //    spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
+        try {
+            val playlistRes =
+                localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
 
-        val playlistRes =
-            localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
-
-        tracks = playlistRes.songs.map { it ->
-            TrackInPoll(
-                Track(
-                    id = it._id,
-                    name = it.track,
-                    artists = it.artist,
-                    imageUri = playlistRes.playlist.albumImageUri
-                ), 0
-            )
+            tracks = playlistRes.songs.map { it ->
+                TrackInPoll(
+                    Track(
+                        id = it._id,
+                        name = it.track,
+                        artists = it.artist,
+                        imageUri = playlistRes.playlist.albumImageUri
+                    ), 0
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Local service backend error", e)
         }
     }
 

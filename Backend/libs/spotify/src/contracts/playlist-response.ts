@@ -11,6 +11,7 @@ export interface Tracks {
 
 export interface Item {
   track: Track;
+  addedBy: AddedBy;
 }
 
 export interface Track {
@@ -18,6 +19,17 @@ export interface Track {
   artists: Album[];
   href: string;
   name: string;
+}
+
+export interface AddedBy {
+  id: string;
+}
+
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImage: string;
 }
 
 export interface Album {

@@ -17,7 +17,7 @@ export class PlaylistService {
     @InjectModel(DeviceToken.name) private deviceTokenModel: Model<DeviceToken>,
     private spotifyService: SpotifyService,
     private playlistGateway: PlaylistGateway,
-  ) {}
+  ) { }
 
   async create(createCatDto: CreatePlaylistDto): Promise<Playlist> {
     const createdPlaylist = new this.playlistModel(createCatDto);
@@ -25,8 +25,13 @@ export class PlaylistService {
   }
 
   async createDeviceToken(createTokenDto: CreateDeviceTokenDto): Promise<DeviceToken> {
-    const createdToken = new this.deviceTokenModel(createTokenDto);
-    return createdToken.save();
+    const { userId, deviceToken } = createTokenDto;
+    const existingDeviceToken = await this.deviceTokenModel.findOne({ userId, deviceToken });
+
+    if (!existingDeviceToken) {
+      const createdToken = new this.deviceTokenModel(createTokenDto);
+      return createdToken.save();
+    }
   }
 
   async findAll() {
@@ -35,24 +40,28 @@ export class PlaylistService {
 
   public async findById(id: string) {
     const playlistResponse = await this.spotifyService.getPlaylists(id);
-    
+
     const images = playlistResponse.tracks.items[0].track.album.images;
 
-    const playlist = await this.playlistModel.create({
-      name: playlistResponse.name,
-      id,
-      description: playlistResponse.description,
-      albumImageUri: (images && images.length > 0) ? images[0].url : "",
-    });
-    const mapSongs = playlistResponse.tracks.items.map(({ track }) => ({
-      track: track.name,
-      album: track.album.name,
-      artist: track.artists[0].name,
-      likes: 0,
-      playlistId: id,
-    }));
+    let playlist = await this.playlistModel.findOne({ id });
 
-    await this.songModel.insertMany(mapSongs);
+    if (!playlist) {
+      playlist = await this.playlistModel.create({
+        name: playlistResponse.name,
+        id,
+        description: playlistResponse.description,
+        albumImageUri: (images && images.length > 0) ? images[0].url : "",
+      });
+      const mapSongs = playlistResponse.tracks.items.map(({ track }) => ({
+        track: track.name,
+        album: track.album.name,
+        artist: track.artists[0].name,
+        likes: 0,
+        playlistId: id,
+      }));
+
+      await this.songModel.insertMany(mapSongs);
+    }
 
     const songs = await this.songModel.find({ playlistId: id }).exec();
     return { playlist, songs };
