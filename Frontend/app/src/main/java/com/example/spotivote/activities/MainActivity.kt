@@ -4,19 +4,33 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
 import com.example.spotivote.service.connectSpotifyAppRemote
-import com.example.spotivote.service.firebase.*
+import com.example.spotivote.service.firebase.MyPreferences
+import com.example.spotivote.service.firebase.registerToken
+import com.example.spotivote.service.firebase.registerTokenDB
 import com.example.spotivote.service.spotifyAppRemote
 import com.example.spotivote.service.spotifyService
-import com.example.spotivote.ui.screens.*
+import com.example.spotivote.ui.screens.CreateRoomScreen
+import com.example.spotivote.ui.screens.HomeScreen
+import com.example.spotivote.ui.screens.LoginScreen
+import com.example.spotivote.ui.screens.RoomByIdScreen
+import com.example.spotivote.ui.screens.RoomConfig
+import com.example.spotivote.ui.screens.SearchScreen
+import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
 import com.spotify.android.appremote.api.SpotifyAppRemote
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

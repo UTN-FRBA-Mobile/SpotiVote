@@ -1,7 +1,5 @@
 package com.example.spotivote.ui.screens
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,8 +15,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +31,6 @@ import com.example.spotivote.ui.components.VoteSection
 fun RoomByIdScreen(
     accessToken: String, user: User, roomConfig: RoomConfig, onGoToSuggestTrack: () -> Unit
 ) {
-    val buttonText = remember { mutableStateOf("Send notification") }
     val context = LocalContext.current
     val firebaseToken = MyPreferences.getFirebaseToken(context)
 
@@ -86,25 +81,14 @@ fun RoomByIdScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = {
-                        Log.d(TAG, "Firebase token: $firebaseToken")
-                        if (firebaseToken != null) {
-                            sendNotificationToUser(
-                                firebaseToken,
-                                "Hi SpotiVote User!!!"
-                            )
-                            android.widget.Toast.makeText(
-                                context,
-                                "Notificación de invitación enviada!",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        sendNotificationToUser(firebaseToken,"Hi SpotiVote User!!!", context)
                     },
                     modifier = Modifier
                         .height(48.dp)
                         .clip(RoundedCornerShape(100.dp))
                 ) {
                     Text(
-                        text = buttonText.value,
+                        text = "Send notification",
                         style = MaterialTheme.typography.button,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )

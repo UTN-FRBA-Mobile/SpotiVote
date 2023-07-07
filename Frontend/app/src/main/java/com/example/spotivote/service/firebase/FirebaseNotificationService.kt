@@ -50,12 +50,11 @@ interface FCMService {
 
 fun registerToken(context: Context) {
     Firebase.messaging.token.addOnCompleteListener { task ->
-        var token = ""
         if (!task.isSuccessful) {
             Log.w(ContentValues.TAG, "Fetching FCM registration token failed", task.exception)
             return@addOnCompleteListener
         }
-        token = task.result
+        val token = task.result
         Log.d(ContentValues.TAG, "FCM Registration token: $token")
 
         MyPreferences.setFirebaseToken(context, token)
@@ -74,30 +73,29 @@ suspend fun registerTokenDB(deviceToken: String?, userId: String){
     }
 }
 
-fun sendNotificationToUser(deviceToken: String, message: String) {
-    val apiKey = "AAAAiQfH7c0:APA91bFAhyYr1gaE1mz-1O-qZOumIuXFpBeJ756yFK5CbcJC8SjHJguKTX2h4ZxsN3HU8a4XIv9DlyQmgP3VPnFkxPje445xTij2yUFnnsAeVfM43k5Ezpa9qMbhVoIVepOot44SOpKg" // TODO: obtenerla de un .env
+fun sendNotificationToUser(deviceToken: String?, message: String, context: Context) {
+    val hasNotificationPermission = MyPreferences.getNotificationPermission(context)
+    Log.d(ContentValues.TAG, "deviceToken: $deviceToken. hasNotificationPermission: $hasNotificationPermission")
 
-    val notificationRequest = NotificationRequest(
-        to = deviceToken,
-        notification = mapOf("title" to "Test notification...", "body" to message)
-    )
+    if (deviceToken != null && hasNotificationPermission) {
+        val apiKey =
+            "AAAAiQfH7c0:APA91bFAhyYr1gaE1mz-1O-qZOumIuXFpBeJ756yFK5CbcJC8SjHJguKTX2h4ZxsN3HU8a4XIv9DlyQmgP3VPnFkxPje445xTij2yUFnnsAeVfM43k5Ezpa9qMbhVoIVepOot44SOpKg" // TODO: obtenerla de un .env
 
-    CoroutineScope(Dispatchers.IO).launch {
-        try {
-            val response = fcmService.sendNotification(
-                authorization = "key=$apiKey",
-                body = notificationRequest
-            )
+        val notificationRequest = NotificationRequest(
+            to = deviceToken,
+            notification = mapOf("title" to "Test notification...", "body" to message)
+        )
 
-            if (response.isSuccessful) {
-                Log.d(TAG, "success response: " + response.message())
-            } else {
-                Log.e(TAG, "error response: " + response.message())
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = fcmService.sendNotification(
+                    authorization = "key=$apiKey",
+                    body = notificationRequest
+                )
+                Log.d(ContentValues.TAG, "Response isSuccessful notification: ${response.isSuccessful}")
+            } catch (e: IOException) {
+                Log.e(TAG, "error Notification IOException: $e")
             }
-        } catch (e: IOException) {
-            Log.e(TAG, "error IOException: $e")
         }
     }
 }
-
-

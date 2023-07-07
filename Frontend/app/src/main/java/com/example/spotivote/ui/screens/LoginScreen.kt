@@ -1,12 +1,20 @@
 package com.example.spotivote.ui.screens
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -14,16 +22,16 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.example.spotivote.service.WebSocketListener
+import com.example.spotivote.service.firebase.MyPreferences
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import okhttp3.OkHttpClient
-import okhttp3.Request
+
 
 val CLIENT_ID = "4240d4ecfccb4c6eaa9f064ead594324"
 val REDIRECT_URI = "com.example.spotivote://callback"
@@ -55,6 +63,18 @@ private fun launchSpotifyLogin(activity: Activity, launcher: ActivityResultLaunc
 
 @Composable
 fun LoginScreen(activity: Activity, onLogin: (String) -> Unit) {
+    val notificationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            MyPreferences.setNotificationPermission(activity, isGranted)
+        }
+    )
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -97,6 +117,7 @@ fun LoginScreen(activity: Activity, onLogin: (String) -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun Circle(modifier: Modifier) {
