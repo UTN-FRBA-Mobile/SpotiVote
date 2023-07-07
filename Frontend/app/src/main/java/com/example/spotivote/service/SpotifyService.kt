@@ -53,7 +53,8 @@ interface SpotifyService {
 
     @GET("v1/users/{user_id}")
     suspend fun getUserById(
-        @Path("user_id") userId: String, @Header("Authorization") authHeader: String
+        @Path("user_id") userId: String,
+        @Header("Authorization") authHeader: String
     ): UserResponse
 
     @GET("v1/me/player/")

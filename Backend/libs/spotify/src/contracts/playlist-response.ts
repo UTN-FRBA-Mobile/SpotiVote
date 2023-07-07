@@ -11,10 +11,11 @@ export interface Tracks {
 
 export interface Item {
   track: Track;
-  addedBy: AddedBy;
+  added_by: AddedBy;
 }
 
 export interface Track {
+  id: string;
   album: Album;
   artists: Album[];
   href: string;

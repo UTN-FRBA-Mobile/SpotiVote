@@ -2,7 +2,6 @@ package com.example.spotivote.service
 
 import com.example.spotivote.service.dto.local.*
 import okhttp3.OkHttpClient
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
@@ -24,6 +23,13 @@ interface LocalService {
         @Path("id") playlistId: String,
         @Header("access_token") authorization: String,
     ): PlaylistResponse
+
+    @GET("playlist/{playlistId}/song/{songId}/")
+    suspend fun getSong(
+        @Path("playlistId") playlistId: String,
+        @Path("songId") songId: String,
+        @Header("access_token") authorization: String,
+    ): SongResponse
 
     @POST("playlist/deviceToken")
     suspend fun postDeviceToken(

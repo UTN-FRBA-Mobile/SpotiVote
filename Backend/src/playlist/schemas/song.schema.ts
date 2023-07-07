@@ -8,11 +8,14 @@ export class Song {
   @Prop()
   _id: mongoose.Schema.Types.ObjectId;
 
+  @Prop({ required: true })
+  id: string;
+
   @Prop()
   artist: string;
 
   @Prop()
-  track: string;
+  trackName: string;
 
   @Prop()
   album: string;

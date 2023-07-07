@@ -52,12 +52,14 @@ export class PlaylistService {
         description: playlistResponse.description,
         albumImageUri: (images && images.length > 0) ? images[0].url : "",
       });
-      const mapSongs = playlistResponse.tracks.items.map(({ track }) => ({
-        track: track.name,
+      const mapSongs = playlistResponse.tracks.items.map(({ track, added_by }) => ({
+        id: track.id,
+        trackName: track.name,
         album: track.album.name,
         artist: track.artists[0].name,
         likes: 0,
         playlistId: id,
+        addedById: added_by.id,
       }));
 
       await this.songModel.insertMany(mapSongs);
@@ -65,6 +67,11 @@ export class PlaylistService {
 
     const songs = await this.songModel.find({ playlistId: id }).exec();
     return { playlist, songs };
+  }
+
+  public async findSongById(playlistId: string, songId: string) {
+    let song = await this.songModel.findOne({ playlistId, id: songId });
+    return { song };
   }
 
   public async modifyLikes(

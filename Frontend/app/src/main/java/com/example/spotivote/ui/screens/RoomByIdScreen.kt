@@ -58,7 +58,7 @@ fun RoomByIdScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                CurrentlyPlaying(accessToken = accessToken)
+                CurrentlyPlaying(roomConfig = roomConfig, accessToken = accessToken)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
