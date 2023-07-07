@@ -4,15 +4,33 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
+import com.example.spotivote.service.connectSpotifyAppRemote
+import com.example.spotivote.service.firebase.MyPreferences
+import com.example.spotivote.service.firebase.registerToken
+import com.example.spotivote.service.firebase.registerTokenDB
+import com.example.spotivote.service.spotifyAppRemote
 import com.example.spotivote.service.spotifyService
-import com.example.spotivote.ui.screens.*
+import com.example.spotivote.ui.screens.CreateRoomScreen
+import com.example.spotivote.ui.screens.HomeScreen
+import com.example.spotivote.ui.screens.LoginScreen
+import com.example.spotivote.ui.screens.RoomByIdScreen
+import com.example.spotivote.ui.screens.RoomConfig
+import com.example.spotivote.ui.screens.SearchScreen
+import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
+import com.spotify.android.appremote.api.SpotifyAppRemote
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +40,22 @@ class MainActivity : ComponentActivity() {
                 App()
             }
         }
+
+        // reloadButton.setOnClickListener { setFirebaseTokenInView() }
+        // subscribeButton.setOnClickListener { subscribeToTopic() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        connectSpotifyAppRemote(this)
+        registerToken(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        spotifyAppRemote?.let {
+            SpotifyAppRemote.disconnect(it)
+        }
     }
 }
 
@@ -30,32 +64,23 @@ class MainActivity : ComponentActivity() {
 fun App() {
     val navController = rememberNavController()
     val activity = LocalContext.current as Activity
-
     var accessToken by remember { mutableStateOf("") }
+    var deviceToken: String? by remember { mutableStateOf("") }
     var roomConfig by remember {
-        mutableStateOf(
-            RoomConfig("", "", "")
-        )
+        mutableStateOf(RoomConfig("", "", "", activity))
     }
-
-    var user by remember {
-        mutableStateOf(
-            User("", "")
-        )
-    }
+    var user by remember { mutableStateOf(User("", "", "")) }
 
     suspend fun getUser() {
-        val response = spotifyService.getMe(
-            "Bearer $accessToken"
-        )
-        user = User(
-            response.display_name, response.images[0].url
-        )
+        val response = spotifyService.getMe("Bearer $accessToken")
+        user = User(response.id, response.display_name, response.images[0].url)
     }
 
     LaunchedEffect(accessToken) {
         if (accessToken != "") {
             getUser()
+            deviceToken = MyPreferences.getFirebaseToken(activity)
+            registerTokenDB(deviceToken, user.id)
         }
     }
 

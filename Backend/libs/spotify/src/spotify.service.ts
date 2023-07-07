@@ -4,7 +4,7 @@ import { SpotifyModuleOptions } from './interfaces/spotify-module-options';
 import { HttpService } from '@nestjs/axios';
 import * as crypto from 'crypto';
 import { lastValueFrom } from 'rxjs';
-import { Playlist } from './contracts/playlist-response';
+import { Playlist, User } from './contracts/playlist-response';
 
 @Injectable()
 export class SpotifyService {
@@ -12,7 +12,7 @@ export class SpotifyService {
   constructor(
     @Inject(SPOTIFY_MODULE_OPTIONS_TOKEN) private options: SpotifyModuleOptions,
     private httpService: HttpService,
-  ) {}
+  ) { }
 
   private async authorize() {
     if (!this.authorized) {
@@ -62,6 +62,7 @@ export class SpotifyService {
   public async getPlaylists(id: string) {
     await this.authorize();
     const auth = this.authorized;
+
     return (
       await lastValueFrom(
         this.httpService.get<Playlist>(
@@ -69,7 +70,7 @@ export class SpotifyService {
           {
             params: {
               fields:
-                'name,description,tracks.items(track(name,href,album(name),artists(name)))',
+                'name,description,tracks.items(track(id,name,href,album(name),artists(name),album(images)),added_by.id)',
             },
             headers: {
               Authorization: `Bearer ${this.authorized}`,
@@ -78,5 +79,23 @@ export class SpotifyService {
         ),
       )
     ).data;
+  }
+
+  public async getUser(userId: String) {
+    await this.authorize();
+    const auth = this.authorized;
+
+    const addedByResponse = await lastValueFrom(
+      this.httpService.get<User>(
+        `https://api.spotify.com/v1/users/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth}`,
+          },
+        },
+      ),
+    );
+
+    return addedByResponse.data;
   }
 }

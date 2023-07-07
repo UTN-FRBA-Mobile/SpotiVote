@@ -13,6 +13,9 @@ export class Playlist {
 
   @Prop()
   description: string;
+
+  @Prop()
+  albumImageUri: string;
 }
 
 export const PlaylistSchema = SchemaFactory.createForClass(Playlist);

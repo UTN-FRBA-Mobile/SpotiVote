@@ -9,14 +9,20 @@ import {
 } from '@nestjs/common';
 import { PlaylistService } from './playlist.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { CreateDeviceTokenDto } from './dto/create-device-token.dto';
 
 @Controller('playlist')
 export class PlaylistController {
-  constructor(private readonly playlistService: PlaylistService) {}
+  constructor(private readonly playlistService: PlaylistService) { }
 
   @Post()
   create(@Body() createPlaylistDto: CreatePlaylistDto) {
     return this.playlistService.create(createPlaylistDto);
+  }
+
+  @Post('/deviceToken')
+  createDeviceToken(@Body() createDeviceTokenDto: CreateDeviceTokenDto) {
+    return this.playlistService.createDeviceToken(createDeviceTokenDto);
   }
 
   @Get()
@@ -27,6 +33,14 @@ export class PlaylistController {
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.playlistService.findById(id);
+  }
+
+  @Get('/:playlistId/song/:songId/')
+  findSongById(
+    @Param('playlistId') playlistId: string,
+    @Param('songId') songId: string,
+  ) {
+    return this.playlistService.findSongById(playlistId, songId);
   }
 
   @Patch('/:playlistId/song/:songId/thumbs-up')
