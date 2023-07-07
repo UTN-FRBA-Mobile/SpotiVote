@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PlaylistModule } from './playlist/playlist.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
-  imports: [MongooseModule.forRoot(process.env.MONGODB_URI), PlaylistModule],
+  imports: [MongooseModule.forRoot(process.env.MONGODB_URI), PlaylistModule, RoomModule],
   controllers: [AppController],
   providers: [AppService],
 })
