@@ -1,4 +1,4 @@
-export class VoteSongDto {
+export class VoteTrackDto {
   user: string;
   track: string;
 }

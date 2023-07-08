@@ -3,4 +3,5 @@ export class CreateRoomDto {
   deviceId: string
   basePlaylistId: string
   owner: string
+  accessToken: string
 }

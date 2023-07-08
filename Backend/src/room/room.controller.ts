@@ -2,9 +2,9 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { RoomService } from './room.service';
 import { AddCandidateDto } from './dto/add-candidate.dto';
-import { VoteSongDto } from './dto/vote-song.dto';
+import { VoteTrackDto } from './dto/vote-track.dto';
 
-@Controller('room')
+@Controller('rooms')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
@@ -32,7 +32,7 @@ export class RoomController {
   }
 
   @Patch(':id/votes')
-  vote(@Param('id') id: string, @Body() voteSongDto: VoteSongDto) {
-    return this.roomService.voteSong(id, voteSongDto);
+  vote(@Param('id') id: string, @Body() voteTrackDto: VoteTrackDto) {
+    return this.roomService.voteTrack(id, voteTrackDto);
   }
 }

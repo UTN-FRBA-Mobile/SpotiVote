@@ -1,5 +1,6 @@
 import { SpotifyModule } from '@app/spotify';
 import { SpotifyModuleOptions } from '@app/spotify/interfaces/spotify-module-options';
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -20,6 +21,7 @@ import { Room, RoomSchema } from './schemas/room.schema';
         clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       }),
     }),
+    HttpModule,
   ],
   controllers: [RoomController],
   providers: [RoomService],

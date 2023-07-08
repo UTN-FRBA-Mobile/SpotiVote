@@ -13,6 +13,16 @@ export interface ICandidate {
   votes: string[];
 }
 
+const User = {
+  id: String,
+  points: Number,
+};
+
+export interface IUser {
+  id: string;
+  points: number;
+}
+
 @Schema()
 export class Room extends Document {
   @Prop({ required: true })
@@ -27,11 +37,14 @@ export class Room extends Document {
   @Prop({ required: true })
   basePlaylistId: string;
 
-  @Prop({ type: [{ type: String }] })
-  users: string[];
+  @Prop({ type: [User] })
+  users: IUser[];
 
   @Prop({ type: [Candidate] })
   candidates: ICandidate[];
+
+  @Prop({ type: Candidate })
+  currentTrack: ICandidate;
 }
 
 export const RoomSchema = SchemaFactory.createForClass(Room);

@@ -1,40 +1,121 @@
 import { SpotifyService } from '@app/spotify';
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateRoomDto } from './dto/create-room.dto';
-import { UpdateRoomDto } from './dto/update-room.dto';
-import { Room } from './schemas/room.schema';
+import { lastValueFrom } from 'rxjs';
+import { CreatedPlaylist, SpotifyPlaylist } from 'src/types';
+import { randomFromList, shuffle } from 'src/utils';
 import { AddCandidateDto } from './dto/add-candidate.dto';
-import { VoteSongDto } from './dto/vote-song.dto';
+import { CreateRoomDto } from './dto/create-room.dto';
+import { VoteTrackDto } from './dto/vote-track.dto';
+import { ICandidate, Room } from './schemas/room.schema';
 
 @Injectable()
 export class RoomService {
   constructor(
     @InjectModel(Room.name) private roomModel: Model<Room>,
     private spotifyService: SpotifyService,
+    private httpService: HttpService,
   ) {}
 
-  create(createRoomDto: CreateRoomDto) {
-    // TODO: crear playlist en spotify con el nombre de la sala usar el id de esa playlist para crear la sala
-    // TODO: Buscar 3 canciones de la playlist base y agregarlas a candidates
-    // TODO: Agarrar 1 canción random y empezar a reproducirla
+  async create(createRoomDto: CreateRoomDto) {
+    const { name, basePlaylistId, deviceId, owner, accessToken } =
+      createRoomDto;
 
-    const { name, basePlaylistId, deviceId, owner } = createRoomDto;
-    const newRoom = this.roomModel.create({
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+
+    const [playlist, basePlaylist] = await Promise.all([
+      lastValueFrom(
+        this.httpService.post<CreatedPlaylist>(
+          `https://api.spotify.com/v1/users/${owner}/playlists`,
+          {
+            name,
+            public: false,
+            collaborative: true,
+            description: 'Playlist created by SpotiVote',
+          },
+          config,
+        ),
+      ),
+      lastValueFrom(
+        this.httpService.get<SpotifyPlaylist>(
+          `https://api.spotify.com/v1/playlists/${basePlaylistId}`,
+          config,
+        ),
+      ),
+    ]);
+
+    const firstTrack = randomFromList(basePlaylist.data.tracks.items);
+
+    const pool = basePlaylist.data.tracks.items.filter(
+      (track) => track.track.id !== firstTrack.track.id,
+    );
+
+    const randomTracks: ICandidate[] = shuffle(pool)
+      .slice(0, 3)
+      .map((track) => {
+        return {
+          addedBy: owner,
+          track: track.track.id,
+          votes: [],
+        };
+      });
+
+    const addFirstTrack = await lastValueFrom(
+      this.httpService.post(
+        `https://api.spotify.com/v1/playlists/${playlist.data.id}/tracks`,
+        {
+          uris: [`spotify:track:${firstTrack.track.id}`],
+        },
+        config,
+      ),
+    );
+
+    const transferPlayback = await lastValueFrom(
+      this.httpService.put(
+        `https://api.spotify.com/v1/me/player`,
+        {
+          device_ids: [deviceId],
+          play: false,
+        },
+        config,
+      ),
+    );
+
+    const playFirstSong = await lastValueFrom(
+      this.httpService.put(
+        `https://api.spotify.com/v1/me/player/play`,
+        {
+          context_uri: `spotify:playlist:${playlist.data.id}`,
+        },
+        config,
+      ),
+    );
+
+    const newRoom = await this.roomModel.create({
       name,
       deviceId,
       basePlaylistId,
-      playlistId: '',
-      users: [owner],
-      candidates: [],
+      playlistId: playlist.data.id,
+      users: [{ id: owner, points: 0 }],
+      candidates: randomTracks,
+      currentTrack: {
+        addedBy: owner,
+        track: firstTrack.track.id,
+        votes: [] as string[],
+      },
     });
 
     return newRoom;
   }
 
   async findAll() {
-    return await this.roomModel.find();
+    return await this.roomModel.find().exec();
   }
 
   async findOne(id: string) {
@@ -61,70 +142,53 @@ export class RoomService {
     // TODO: Agregar el candidato más votado a la room.playlistId de spotify
     // la canción la tiene que agregar el usuario que la agregó a la lista de candidatos
 
-    // TODO: sumarle puntos al que propuso la canción que ganó
+    room.users.find((u) => u.id === addedBy).points += 10;
+    room.currentTrack = mostVotedCandidate;
 
     // TODO: 3 nuevos candidates random del basePlaylistId
     // Restablecer la lista de candidatos y votos
     room.candidates = [];
 
     // TODO: disparar evento de que terminó la votación
-
     return await room.save();
   }
 
   async addCandidate(roomId: string, addCandidateDto: AddCandidateDto) {
-    // TODO: validar si el usuario tiene puntos para agregar una canción
-
-    const { user, track } = addCandidateDto;
-    const room = await this.roomModel.findByIdAndUpdate(roomId, {
-      $push: { candidates: { user, track, votes: [] } },
-    });
-
-    // TODO: restar puntos al usuario
-    // TODO: disparar evento de que se agregó un candidato
-  }
-
-  async voteSong(roomId: string, voteSongDto: VoteSongDto): Promise<Room> {
     const room = await this.roomModel.findById(roomId).exec();
     if (!room) {
       throw new Error('Room not found');
     }
+    const { user: userId, track } = addCandidateDto;
 
-    const { user, track } = voteSongDto;
-    const candidateIndex = room.candidates.findIndex((c) => c.track === track);
-    if (candidateIndex === -1) {
-      throw new Error('Candidate song not found');
+    const user = room.users.find((u) => u.id === userId);
+
+    if (user.points >= 3) {
+      user.points -= 3;
+      room.candidates.push({ addedBy: userId, track, votes: [userId] });
     }
 
-    const candidate = room.candidates[candidateIndex];
-    const updatedVotes = [...candidate.votes];
+    return await room.save();
+    // TODO: disparar evento de que se agregó un candidato
+  }
 
-    const userVoteIndex = updatedVotes.indexOf(user);
-    if (userVoteIndex !== -1) {
-      // Si el usuario ya ha votado, reasignar el voto quitando el voto anterior
-      updatedVotes.splice(userVoteIndex, 1);
-    }
+  async voteTrack(roomId: string, voteTrackDto: VoteTrackDto): Promise<Room> {
+    const { user, track } = voteTrackDto;
 
-    const updatedCandidate = {
-      ...candidate,
-      votes: [...updatedVotes, user],
-    };
+    const room = await this.roomModel.findById(roomId).populate('candidates');
 
-    const updatedCandidates = [
-      ...room.candidates.slice(0, candidateIndex),
-      updatedCandidate,
-      ...room.candidates.slice(candidateIndex + 1),
-    ];
-
-    const updatedRoom = {
-      ...room.toObject(),
-      candidates: updatedCandidates,
-    };
-
-    // TODO: disparar evento de que cambiaron los votos
-
-    return await this.roomModel.findByIdAndUpdate(roomId, updatedRoom, {
-      new: true,
+    room.candidates.forEach((candidate: ICandidate) => {
+      const voteIndex = candidate.votes.indexOf(user);
+      if (voteIndex !== -1) {
+        candidate.votes.splice(voteIndex, 1);
+      }
     });
+
+    const candidate = room.candidates.find(
+      (candidate: ICandidate) => candidate.track === track,
+    );
+
+    candidate.votes.push(user);
+
+    return await room.save();
   }
 }
