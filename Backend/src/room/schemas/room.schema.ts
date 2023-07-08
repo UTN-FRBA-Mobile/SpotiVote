@@ -15,11 +15,13 @@ export interface ICandidate {
 
 const User = {
   id: String,
+  accessToken: String,
   points: Number,
 };
 
 export interface IUser {
   id: string;
+  accessToken: string;
   points: number;
 }
 
@@ -27,6 +29,9 @@ export interface IUser {
 export class Room extends Document {
   @Prop({ required: true })
   name: string;
+
+  @Prop({ required: true })
+  owner: string;
 
   @Prop({ required: true })
   playlistId: string;

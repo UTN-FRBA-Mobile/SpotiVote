@@ -31,6 +31,11 @@ export class RoomController {
     return this.roomService.addCandidate(id, addCandidateDto);
   }
 
+  @Patch(':id/poll')
+  endPoll(@Param('id') id: string) {
+    return this.roomService.closeVotingAndAddToPlaylist(id);
+  }
+
   @Patch(':id/votes')
   vote(@Param('id') id: string, @Body() voteTrackDto: VoteTrackDto) {
     return this.roomService.voteTrack(id, voteTrackDto);
