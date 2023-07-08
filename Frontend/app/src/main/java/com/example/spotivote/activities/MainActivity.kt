@@ -24,6 +24,7 @@ import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.CreateRoomScreen
 import com.example.spotivote.ui.screens.HomeScreen
 import com.example.spotivote.ui.screens.LoginScreen
+import com.example.spotivote.ui.screens.QrCodeScannerScreen
 import com.example.spotivote.ui.screens.RoomByIdScreen
 import com.example.spotivote.ui.screens.RoomConfig
 import com.example.spotivote.ui.screens.SearchScreen
@@ -99,13 +100,19 @@ fun App() {
                 run {
                     navController.navigate("create-room")
                 }
-            }, onNavigateToJoinRoom = {
+            }, onNavigateToQrCodeScanner = {
                 run {
-                    navController.navigate("join-room")
+                    navController.navigate("qr-code-scanner")
                 }
             })
         }
-
+        composable("qr-code-scanner") {
+            QrCodeScannerScreen(onNavigateToJoinRoom = {
+                run {
+                    navController.navigate("room-by-id")
+                }
+            })
+        }
         composable("create-room") {
             CreateRoomScreen(accessToken, user, onCreateRoom = {
                 roomConfig = it

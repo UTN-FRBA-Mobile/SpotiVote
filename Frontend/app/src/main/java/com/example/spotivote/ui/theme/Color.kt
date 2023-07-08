@@ -3,5 +3,5 @@ package com.example.spotivote.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val Dark = Color(0xFF1D1D1D)
-val Light = Color(0xFAFAFA)
+val Light = Color(0xFFFAFAFA)
 val Green = Color(0xFF1BD760)
