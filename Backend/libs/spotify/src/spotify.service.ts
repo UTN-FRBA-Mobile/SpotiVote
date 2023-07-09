@@ -11,7 +11,7 @@ import {
 export class SpotifyService {
   constructor(private httpService: HttpService) {}
 
-  public async getUser(userId: String, accessToken: string) {
+  public async getUser(userId: string, accessToken: string) {
     const response = await lastValueFrom(
       this.httpService.get<{
         id: string;
