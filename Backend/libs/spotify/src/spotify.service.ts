@@ -1,7 +1,12 @@
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
-import { CreatedPlaylist, Playlist, Track, User } from './contracts/playlist-response';
+import {
+  CreatedPlaylist,
+  Playlist,
+  Track,
+  User,
+} from './contracts/playlist-response';
 import { SPOTIFY_MODULE_OPTIONS_TOKEN } from './interfaces/spotify-module-definition';
 import { SpotifyModuleOptions } from './interfaces/spotify-module-options';
 
@@ -80,19 +85,24 @@ export class SpotifyService {
     ).data;
   }
 
-  public async getUser(userId: String) {
-    await this.authorize();
-    const auth = this.authorized;
-
-    const addedByResponse = await lastValueFrom(
-      this.httpService.get<User>(`https://api.spotify.com/v1/users/${userId}`, {
+  public async getUser(userId: String, accessToken: string) {
+    const response = await lastValueFrom(
+      this.httpService.get<{
+        id: string;
+        display_name: string;
+        images: { url: string }[];
+      }>(`https://api.spotify.com/v1/users/${userId}`, {
         headers: {
-          Authorization: `Bearer ${auth}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }),
     );
 
-    return addedByResponse.data;
+    return {
+      id: response.data.id,
+      displayName: response.data.display_name,
+      profileImage: response.data.images[0].url,
+    };
   }
 
   public async createPlaylist(

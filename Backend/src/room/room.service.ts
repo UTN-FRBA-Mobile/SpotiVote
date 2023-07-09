@@ -21,9 +21,10 @@ export class RoomService {
     const { name, basePlaylistId, deviceId, owner, accessToken } =
       createRoomDto;
 
-    const [playlist, basePlaylist] = await Promise.all([
+    const [playlist, basePlaylist, addedBy] = await Promise.all([
       this.spotifyService.createPlaylist(owner, name, '', accessToken),
       this.spotifyService.getPlaylist(basePlaylistId, accessToken),
+      this.spotifyService.getUser(owner, accessToken),
     ]);
 
     const firstTrack = randomFromList(basePlaylist.tracks.items);
@@ -36,7 +37,7 @@ export class RoomService {
       .slice(0, 3)
       .map((track) => {
         return {
-          addedBy: owner,
+          addedBy,
           track: track.track,
           votes: [],
         };
@@ -71,7 +72,7 @@ export class RoomService {
       owner: owner,
       candidates: randomTracks,
       currentTrack: {
-        addedBy: owner,
+        addedBy: addedBy,
         track: firstTrack.track,
         votes: [] as string[],
       },
@@ -97,7 +98,7 @@ export class RoomService {
     );
     const mostVotedCandidate = sortedCandidates[0];
     const { addedBy, track: winnerTrack } = mostVotedCandidate;
-    const winnerUser = room.users.find((u) => u.id === addedBy);
+    const winnerUser = room.users.find((u) => u.id === addedBy.id);
 
     const ownerUser = room.users.find((u) => u.id === room.owner);
 
@@ -109,11 +110,16 @@ export class RoomService {
       (track) => track.track.id !== winnerTrack.id,
     );
 
+    const addedByProfile = await this.spotifyService.getUser(
+      room.owner,
+      ownerUser.accessToken,
+    );
+
     const randomTracks: ICandidate[] = shuffle(pool)
       .slice(0, 3)
       .map((track) => {
         return {
-          addedBy: room.owner,
+          addedBy: addedByProfile,
           track: track.track,
           votes: [],
         };
@@ -162,11 +168,14 @@ export class RoomService {
     // Resta 3 puntos al usuario
     user.points -= 3;
 
-    const track = await this.spotifyService.getTrack(trackId, user.accessToken);
+    const [track, addedBy] = await Promise.all([
+      this.spotifyService.getTrack(trackId, user.accessToken),
+      this.spotifyService.getUser(userId, user.accessToken),
+    ]);
 
     // Agrega la nueva canción candidata al pool
     const newCandidate: ICandidate = {
-      addedBy: userId,
+      addedBy,
       track,
       votes: [],
     };

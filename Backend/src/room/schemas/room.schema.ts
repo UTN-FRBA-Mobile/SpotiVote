@@ -21,14 +21,26 @@ export interface ITrack {
   name: string;
 }
 
+const AddedBy = {
+  id: String,
+  displayName: String,
+  profileImage: String,
+};
+
+export interface IAddedBy {
+  id: string;
+  displayName: string;
+  profileImage: string;
+}
+
 const Candidate = {
-  addedBy: String,
+  addedBy: AddedBy,
   track: Track,
   votes: [{ type: String }],
 };
 
 export interface ICandidate {
-  addedBy: string;
+  addedBy: IAddedBy;
   track: ITrack;
   votes: string[];
 }

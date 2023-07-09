@@ -29,8 +29,8 @@ export interface AddedBy {
 export interface User {
   id: string;
   username: string;
-  displayName: string;
-  profileImage: string;
+  display_name: string;
+  profile_image: string;
 }
 
 export interface Album {
