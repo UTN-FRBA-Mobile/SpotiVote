@@ -3,6 +3,7 @@ import { AddCandidateDto } from './dto/add-candidate.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { VoteTrackDto } from './dto/vote-track.dto';
 import { RoomService } from './room.service';
+import { JoinRoomDto } from './dto/join-room.dto';
 
 @Controller('rooms')
 export class RoomController {
@@ -22,6 +23,11 @@ export class RoomController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.roomService.findOne(id);
+  }
+
+  @Post(':id/join')
+  joinRoom(@Param('id') id: string, @Body() joinRoomDto: JoinRoomDto) {
+    return this.roomService.joinRoom(id, joinRoomDto);
   }
 
   @Post(':id/candidates')

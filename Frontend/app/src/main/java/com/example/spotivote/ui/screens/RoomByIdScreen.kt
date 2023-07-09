@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.User
 import com.example.spotivote.service.Callbacks
+import com.example.spotivote.service.JoinRoomRequest
 import com.example.spotivote.service.RoomResponse
 import com.example.spotivote.service.VoteRequest
 import com.example.spotivote.service.WebSocketListener
@@ -55,7 +56,7 @@ fun RoomByIdScreen(
 
     LaunchedEffect(roomId) {
         // Utilizar el roomId para obtener los datos de la sala
-        val fetchedRoomConfig = localService.getRoom(roomId)
+        val fetchedRoomConfig = localService.joinRoom(roomId, JoinRoomRequest(user.id, accessToken))
         room = fetchedRoomConfig
     }
 

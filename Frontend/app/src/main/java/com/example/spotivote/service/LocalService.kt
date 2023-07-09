@@ -74,6 +74,11 @@ data class VoteRequest(
     val userId: String,
 )
 
+data class JoinRoomRequest(
+    val id: String,
+    val accessToken: String
+)
+
 interface LocalService {
 
     @POST("device-token")
@@ -87,6 +92,12 @@ interface LocalService {
     @POST("rooms")
     suspend fun createRoom(
         @Body body: CreateRoomRequest,
+    ): RoomResponse
+
+    @POST("rooms/{id}/join")
+    suspend fun joinRoom(
+        @Path("id") id: String,
+        @Body body: JoinRoomRequest,
     ): RoomResponse
 
     @GET("rooms/{id}")

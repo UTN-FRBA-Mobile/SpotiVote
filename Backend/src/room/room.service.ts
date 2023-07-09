@@ -8,6 +8,7 @@ import { AddCandidateDto } from './dto/add-candidate.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { VoteTrackDto } from './dto/vote-track.dto';
 import { ICandidate, IUser, Room } from './schemas/room.schema';
+import { JoinRoomDto } from './dto/join-room.dto';
 
 @Injectable()
 export class RoomService {
@@ -183,12 +184,6 @@ export class RoomService {
 
     // Verifica si el usuario tiene suficientes puntos para agregar una canción candidata
     const user = room.users.find((user: IUser) => user.id === userId);
-    if (!user || user.points < 3) {
-      throw new Error('Not enough points');
-    }
-
-    // Resta 3 puntos al usuario
-    user.points -= 3;
 
     const [track, addedBy] = await Promise.all([
       this.spotifyService.getTrack(trackId, user.accessToken),
@@ -201,6 +196,13 @@ export class RoomService {
     );
 
     if (!trackAlreadyInCandidates) {
+      if (!user || user.points < 3) {
+        throw new Error('Not enough points');
+      }
+
+      // Resta 3 puntos al usuario
+      user.points -= 3;
+
       // Agrega la nueva canción candidata al pool
       const newCandidate: ICandidate = {
         addedBy,
@@ -245,5 +247,22 @@ export class RoomService {
     });
 
     return await room.save();
+  }
+
+  async joinRoom(roomId: string, joinRoomDto: JoinRoomDto): Promise<Room> {
+    const { id, accessToken } = joinRoomDto;
+    const room = await this.roomModel.findById(roomId).populate('users');
+
+    const user = room.users.find((user: IUser) => user.id === id);
+
+    if (!user) {
+      room.users.push({
+        id,
+        accessToken,
+        points: 10,
+      });
+    }
+
+    return room.save();
   }
 }
