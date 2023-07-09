@@ -41,6 +41,11 @@ data class CandidateAddedBy(
     val profileImage: String,
 )
 
+data class UserInRoom(
+    val id: String,
+    val points: Number
+)
+
 data class Candidate(
     val addedBy: CandidateAddedBy,
     val track: CandidateTrack,
@@ -55,7 +60,8 @@ data class RoomResponse(
     val _id: String,
     val basePlaylistId: String,
     val candidates: List<Candidate>,
-    val currentTrack: Candidate
+    val currentTrack: Candidate,
+    val users: List<UserInRoom>
 )
 
 data class AddCandidateRequest(
@@ -86,6 +92,9 @@ interface LocalService {
     suspend fun postDeviceToken(
         @Body body: DeviceTokenRequest,
     )
+
+    @GET("rooms")
+    suspend fun getRooms(): List<RoomResponse>
 
     @POST("rooms")
     suspend fun createRoom(

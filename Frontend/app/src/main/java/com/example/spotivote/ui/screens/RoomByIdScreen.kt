@@ -52,6 +52,7 @@ fun RoomByIdScreen(
     val firebaseToken = MyPreferences.getFirebaseToken(context)
     var room by remember { mutableStateOf<RoomResponse?>(null) }
 
+
     LaunchedEffect(roomId) {
         // Utilizar el roomId para obtener los datos de la sala
         val fetchedRoomConfig = localService.getRoom(roomId)
@@ -67,17 +68,12 @@ fun RoomByIdScreen(
     }
 
     val client = OkHttpClient()
-    val socketUrl =
-        "ws://192.168.0.3:8055"
+    val socketUrl = "ws://192.168.0.3:8055"
     val request: Request = Request.Builder().url(socketUrl).build()
 
-    val listener = WebSocketListener(
-        Callbacks(
-            onRefetch = {
-                coroutineScope.launch { refreshRoom() }
-            }
-        )
-    )
+    val listener = WebSocketListener(Callbacks(onRefetch = {
+        coroutineScope.launch { refreshRoom() }
+    }))
     val ws = client.newWebSocket(request, listener)
 
     Surface(
@@ -87,10 +83,12 @@ fun RoomByIdScreen(
         color = MaterialTheme.colors.background
     ) {
         if (room != null) {
+            val userPoints = room?.users?.find { it.id == user.id }?.points ?: 0
+            val canSuggest = userPoints.toInt() >= 3
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                NavBar(user = user)
+                NavBar(user = user, userPoints = userPoints)
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -109,28 +107,23 @@ fun RoomByIdScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    VoteSection(
-                        tracks = room!!.candidates.map { candidate ->
-                            TrackInPoll(
-                                track = TrackInPollTrack(
-                                    candidate.track.id,
-                                    candidate.track.name,
-                                    candidate.track.artists.joinToString(", ") { it.name },
-                                    candidate.track.album.images[0].url,
-                                ),
-                                votes = candidate.votes,
+                    VoteSection(tracks = room!!.candidates.map { candidate ->
+                        TrackInPoll(
+                            track = TrackInPollTrack(
+                                candidate.track.id,
+                                candidate.track.name,
+                                candidate.track.artists.joinToString(", ") { it.name },
+                                candidate.track.album.images[0].url,
+                            ),
+                            votes = candidate.votes,
+                        )
+                    }, user, onVote = { trackId ->
+                        coroutineScope.launch {
+                            room = localService.vote(
+                                roomId, VoteRequest(trackId, user.id)
                             )
-                        },
-                        user,
-                        onVote = { trackId ->
-                            coroutineScope.launch {
-                                room = localService.vote(
-                                    roomId,
-                                    VoteRequest(trackId, user.id)
-                                )
-                            }
                         }
-                    )
+                    })
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -138,7 +131,8 @@ fun RoomByIdScreen(
                         onClick = { onGoToSuggestTrack() },
                         modifier = Modifier
                             .height(48.dp)
-                            .clip(RoundedCornerShape(100.dp))
+                            .clip(RoundedCornerShape(100.dp)),
+                        enabled = canSuggest
                     ) {
                         Text(
                             text = "Suggest Track",

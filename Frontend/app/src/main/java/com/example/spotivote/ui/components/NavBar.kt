@@ -1,7 +1,13 @@
 package com.example.spotivote.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -16,7 +22,7 @@ import com.example.spotivote.model.User
 
 
 @Composable
-fun NavBar(user: User) {
+fun NavBar(user: User, userPoints: Number? = null) {
     TopAppBar(
         modifier = Modifier.background(color = Color.Transparent)
     ) {
@@ -24,10 +30,8 @@ fun NavBar(user: User) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = 6.dp,
-                    vertical = 6.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                    horizontal = 6.dp, vertical = 6.dp
+                ), verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = user.imageUri,
@@ -39,8 +43,10 @@ fun NavBar(user: User) {
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(text = user.displayName)
-            Spacer(modifier = Modifier.weight(1f))
-            Text(text = "123")
+            if (userPoints != null) {
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = userPoints.toString())
+            }
         }
     }
 }
