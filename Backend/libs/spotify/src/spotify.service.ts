@@ -1,90 +1,16 @@
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import {
   CreatedPlaylist,
   Playlist,
-  Track,
-  User,
+  Track
 } from './contracts/playlist-response';
-import { SPOTIFY_MODULE_OPTIONS_TOKEN } from './interfaces/spotify-module-definition';
-import { SpotifyModuleOptions } from './interfaces/spotify-module-options';
 
 @Injectable()
 export class SpotifyService {
-  public authorized = null;
-  constructor(
-    @Inject(SPOTIFY_MODULE_OPTIONS_TOKEN) private options: SpotifyModuleOptions,
-    private httpService: HttpService,
-  ) {}
-
-  private async authorize() {
-    if (!this.authorized) {
-      // const state = crypto.randomBytes(64).toString('hex');
-      // const scope = 'user-read-private user-read-email';
-      // const redirect_uri = 'http://localhost:8888/callback';
-
-      // const codeChallenge = (
-      //   await lastValueFrom(
-      //     this.httpService.post('https://accounts.spotify.com/api/token', {
-      //       params: {
-      //         response_type: 'code',
-      //         client_id: this.options.clientId,
-      //         scope: scope,
-      //         redirect_uri: redirect_uri,
-      //         state: state,
-      //       },
-      //     }),
-      //   )
-      // ).data;
-
-      const headers = {
-        Authorization: `Basic ${Buffer.from(
-          this.options.clientId + ':' + this.options.clientSecret,
-        ).toString('base64')}`,
-      };
-
-      const data = new URLSearchParams({
-        grant_type: 'client_credentials',
-      });
-
-      const authTokenResponse = await lastValueFrom(
-        this.httpService.post('https://accounts.spotify.com/api/token', data, {
-          headers,
-        }),
-      );
-
-      if (authTokenResponse.status === 200) {
-        this.authorized = authTokenResponse.data.access_token;
-      }
-    }
-  }
-  public async getPing() {
-    return JSON.stringify(this.options);
-  }
-
-  public async getPlaylists(id: string) {
-    await this.authorize();
-    const auth = this.authorized;
-
-    return (
-      await lastValueFrom(
-        this.httpService.get<Playlist>(
-          `https://api.spotify.com/v1/playlists/${id}`,
-          {
-            params: {
-              fields:
-                'name,description,tracks.items(track(id,name,href,album(name),artists(name),album(images)),added_by.id)',
-            },
-            headers: {
-              Authorization: `Bearer ${this.authorized}`,
-            },
-          },
-        ),
-      )
-    ).data;
-  }
-
+  constructor(private httpService: HttpService) {}
+  
   public async getUser(userId: String, accessToken: string) {
     const response = await lastValueFrom(
       this.httpService.get<{
