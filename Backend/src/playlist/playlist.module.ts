@@ -29,6 +29,6 @@ import { DeviceToken, DeviceTokenSchema } from './schemas/device-token.schema';
     }),
   ],
   controllers: [PlaylistController],
-  providers: [PlaylistService, PlaylistGateway],
+  providers: [PlaylistService],
 })
 export class PlaylistModule {}

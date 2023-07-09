@@ -8,14 +8,25 @@ import { AddCandidateDto } from './dto/add-candidate.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { VoteTrackDto } from './dto/vote-track.dto';
 import { ICandidate, IUser, Room } from './schemas/room.schema';
+import { Server } from 'ws';
 
 @Injectable()
 export class RoomService {
+  private wsServer: Server;
+
   constructor(
     @InjectModel(Room.name) private roomModel: Model<Room>,
     private spotifyService: SpotifyService,
     private httpService: HttpService,
-  ) {}
+  ) {
+    this.wsServer = new Server({ port: 80 });
+    this.wsServer.on('connection', (ws) => {
+      ws.on('message', (message) => {
+        console.log('received: %s', message);
+      });
+      ws.send('something');
+    });
+  }
 
   async create(createRoomDto: CreateRoomDto) {
     const { name, basePlaylistId, deviceId, owner, accessToken } =
@@ -77,6 +88,11 @@ export class RoomService {
         votes: [] as string[],
       },
     });
+
+    // setTimeout(() => {
+    //   console.log(`Closing voting for room ${newRoom._id}`);
+    //   this.closeVotingAndAddToPlaylist(newRoom._id);
+    // }, 1000 * 10);
 
     return newRoom;
   }
@@ -143,7 +159,15 @@ export class RoomService {
 
     room.candidates = randomTracks;
 
-    // TODO: disparar evento de que terminó la votación
+    // setTimeout(() => {
+    //   console.log(`Closing voting for room ${room._id}`);
+    //   this.closeVotingAndAddToPlaylist(room._id);
+    // }, 1000 * 10);
+
+    this.wsServer.clients.forEach((client) => {
+      client.send('refetch');
+    });
+
     return await room.save();
   }
 
@@ -184,7 +208,13 @@ export class RoomService {
 
     // Guarda los cambios en la base de datos
     await room.save();
-    return await this.voteTrack(roomId, { userId, trackId });
+    const updatedRoom = await this.voteTrack(roomId, { userId, trackId });
+
+    this.wsServer.clients.forEach((client) => {
+      client.send('refetch');
+    });
+
+    return updatedRoom;
   }
 
   async voteTrack(roomId: string, voteTrackDto: VoteTrackDto): Promise<Room> {
@@ -204,6 +234,10 @@ export class RoomService {
     );
 
     candidate.votes.push(userId);
+
+    this.wsServer.clients.forEach((client) => {
+      client.send('refetch');
+    });
 
     return await room.save();
   }
