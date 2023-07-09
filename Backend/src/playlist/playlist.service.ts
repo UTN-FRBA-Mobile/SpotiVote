@@ -1,13 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePlaylistDto } from './dto/create-playlist.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Playlist } from './schemas/playlist.schema';
-import { Model } from 'mongoose';
 import { SpotifyService } from '@app/spotify';
-import { Song } from './schemas/song.schema';
-import { DeviceToken } from './schemas/device-token.schema';
-import { PlaylistGateway } from './playlist.gateway';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateDeviceTokenDto } from './dto/create-device-token.dto';
+import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { DeviceToken } from './schemas/device-token.schema';
+import { Playlist } from './schemas/playlist.schema';
+import { Song } from './schemas/song.schema';
 
 @Injectable()
 export class PlaylistService {
@@ -16,7 +15,6 @@ export class PlaylistService {
     @InjectModel(Song.name) private songModel: Model<Song>,
     @InjectModel(DeviceToken.name) private deviceTokenModel: Model<DeviceToken>,
     private spotifyService: SpotifyService,
-    private playlistGateway: PlaylistGateway,
   ) { }
 
   async create(createCatDto: CreatePlaylistDto): Promise<Playlist> {
@@ -85,7 +83,6 @@ export class PlaylistService {
       { new: true },
     );
 
-    await this.playlistGateway.sendMessage(songId, incrementLike.likes);
     return incrementLike;
   }
 }

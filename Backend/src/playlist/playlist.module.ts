@@ -1,14 +1,13 @@
-import { Module } from '@nestjs/common';
-import { PlaylistService } from './playlist.service';
-import { PlaylistController } from './playlist.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Playlist, PlaylistSchema } from './schemas/playlist.schema';
 import { SpotifyModule } from '@app/spotify';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SpotifyModuleOptions } from '@app/spotify/interfaces/spotify-module-options';
-import { PlaylistGateway } from './playlist.gateway';
-import { Song, SongSchema } from './schemas/song.schema';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { PlaylistController } from './playlist.controller';
+import { PlaylistService } from './playlist.service';
 import { DeviceToken, DeviceTokenSchema } from './schemas/device-token.schema';
+import { Playlist, PlaylistSchema } from './schemas/playlist.schema';
+import { Song, SongSchema } from './schemas/song.schema';
 
 @Module({
   imports: [

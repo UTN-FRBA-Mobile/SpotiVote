@@ -6,7 +6,11 @@ import { PlaylistModule } from './playlist/playlist.module';
 import { RoomModule } from './room/room.module';
 
 @Module({
-  imports: [MongooseModule.forRoot(process.env.MONGODB_URI), RoomModule],
+  imports: [
+    MongooseModule.forRoot(process.env.MONGODB_URI),
+    RoomModule,
+    PlaylistModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -49,7 +49,7 @@ fun VoteSection(tracks: List<TrackInPoll>, user: User, onVote: (String) -> Unit)
             modifier = Modifier
                 .clip(shape = RoundedCornerShape(6.dp))
                 .background(color = Color(0xFF404040))
-                .height(400.dp)
+                .height((tracks.size * 74).dp)
         ) {
             LazyColumn {
                 items(items = tracks, itemContent = { trackInPoll ->
@@ -70,7 +70,7 @@ fun VoteSection(tracks: List<TrackInPoll>, user: User, onVote: (String) -> Unit)
                         Row() {
                             AsyncImage(
                                 model = trackInPoll.track.imageUri,
-                                contentDescription = "Playlist Image",
+                                contentDescription = "Track Image",
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(2.dp))
                                     .size(50.dp)
