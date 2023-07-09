@@ -2,6 +2,7 @@ package com.example.spotivote.activities
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -78,7 +79,12 @@ fun App() {
 
     suspend fun getUser() {
         val response = spotifyService.getMe("Bearer $accessToken")
-        user = User(response.id, response.display_name, response.images[0].url)
+        Log.d("MainActivity", "getUser: $response")
+        if (response.images.isNotEmpty()) {
+            user = User(response.id, response.display_name, response.images[0].url)
+        } else {
+            user = User(response.id, response.display_name, "")
+        }
     }
 
     LaunchedEffect(accessToken) {
@@ -107,6 +113,10 @@ fun App() {
             }, onNavigateToQrCodeScanner = {
                 run {
                     navController.navigate("qr-code-scanner")
+                }
+            }, onNavigateToRoom = {
+                run {
+                    navController.navigate("room-by-id/$it")
                 }
             })
         }

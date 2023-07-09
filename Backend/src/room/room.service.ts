@@ -147,7 +147,7 @@ export class RoomService {
     const addWinnerTrack = await this.spotifyService.addTrackToPlaylist(
       room.playlistId,
       winnerTrack.id,
-      winnerUser.accessToken,
+      ownerUser.accessToken,
     );
 
     const playWinnerSong = await this.spotifyService.playTrackInPlaylist(

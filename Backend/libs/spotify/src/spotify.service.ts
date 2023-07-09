@@ -4,13 +4,13 @@ import { lastValueFrom } from 'rxjs';
 import {
   CreatedPlaylist,
   Playlist,
-  Track
+  Track,
 } from './contracts/playlist-response';
 
 @Injectable()
 export class SpotifyService {
   constructor(private httpService: HttpService) {}
-  
+
   public async getUser(userId: String, accessToken: string) {
     const response = await lastValueFrom(
       this.httpService.get<{
@@ -27,7 +27,8 @@ export class SpotifyService {
     return {
       id: response.data.id,
       displayName: response.data.display_name,
-      profileImage: response.data.images[0].url,
+      profileImage:
+        response.data.images.length > 0 ? response.data.images[0].url : '',
     };
   }
 
@@ -92,7 +93,7 @@ export class SpotifyService {
         },
       ),
     );
-
+    
     return response.data;
   }
 
