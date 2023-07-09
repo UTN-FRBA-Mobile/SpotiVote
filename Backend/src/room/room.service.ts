@@ -1,14 +1,13 @@
 import { SpotifyService } from '@app/spotify';
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { randomFromList, shuffle } from 'src/utils';
+import { Server } from 'ws';
 import { AddCandidateDto } from './dto/add-candidate.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { VoteTrackDto } from './dto/vote-track.dto';
 import { ICandidate, IUser, Room } from './schemas/room.schema';
-import { Server } from 'ws';
 
 @Injectable()
 export class RoomService {
@@ -17,7 +16,6 @@ export class RoomService {
   constructor(
     @InjectModel(Room.name) private roomModel: Model<Room>,
     private spotifyService: SpotifyService,
-    private httpService: HttpService,
   ) {
     this.wsServer = new Server({ port: 80 });
     this.wsServer.on('connection', (ws) => {
