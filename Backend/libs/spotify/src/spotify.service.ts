@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
-import { CreatedPlaylist, Playlist, User } from './contracts/playlist-response';
+import { CreatedPlaylist, Playlist, Track, User } from './contracts/playlist-response';
 import { SPOTIFY_MODULE_OPTIONS_TOKEN } from './interfaces/spotify-module-definition';
 import { SpotifyModuleOptions } from './interfaces/spotify-module-options';
 
@@ -193,6 +193,21 @@ export class SpotifyService {
             uri: `spotify:track:${trackId}`,
           },
         },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    );
+
+    return response.data;
+  }
+
+  public async getTrack(trackId: string, accessToken: string) {
+    const response = await lastValueFrom(
+      this.httpService.get<Track>(
+        `https://api.spotify.com/v1/tracks/${trackId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

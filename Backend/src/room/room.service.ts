@@ -37,7 +37,7 @@ export class RoomService {
       .map((track) => {
         return {
           addedBy: owner,
-          track: track.track.id,
+          track: track.track,
           votes: [],
         };
       });
@@ -48,21 +48,18 @@ export class RoomService {
       accessToken,
     );
 
-    const transferPlayback = await this.spotifyService.transferPlayback(
-      deviceId,
-      accessToken,
-    ).catch(e => {
-      console.log('Error transferPlayback')
-      console.log(e)
-    });
+    const transferPlayback = await this.spotifyService
+      .transferPlayback(deviceId, accessToken)
+      .catch((e) => {
+        console.log('Error transferPlayback');
+        console.log(e);
+      });
 
-    const playFirstSong = await this.spotifyService.playTrackInPlaylist(
-      playlist.id,
-      firstTrack.track.id,
-      accessToken,
-      ).catch(e => {
-        console.log('Error playFirstSong')
-        console.log(e)
+    const playFirstSong = await this.spotifyService
+      .playTrackInPlaylist(playlist.id, firstTrack.track.id, accessToken)
+      .catch((e) => {
+        console.log('Error playFirstSong');
+        console.log(e);
       });
 
     const newRoom = await this.roomModel.create({
@@ -75,7 +72,7 @@ export class RoomService {
       candidates: randomTracks,
       currentTrack: {
         addedBy: owner,
-        track: firstTrack.track.id,
+        track: firstTrack.track,
         votes: [] as string[],
       },
     });
@@ -109,7 +106,7 @@ export class RoomService {
       ownerUser.accessToken,
     );
     const pool = basePlaylist.tracks.items.filter(
-      (track) => track.track.id !== winnerTrack,
+      (track) => track.track.id !== winnerTrack.id,
     );
 
     const randomTracks: ICandidate[] = shuffle(pool)
@@ -117,7 +114,7 @@ export class RoomService {
       .map((track) => {
         return {
           addedBy: room.owner,
-          track: track.track.id,
+          track: track.track,
           votes: [],
         };
       });
@@ -128,13 +125,13 @@ export class RoomService {
 
     const addWinnerTrack = await this.spotifyService.addTrackToPlaylist(
       room.playlistId,
-      winnerTrack,
+      winnerTrack.id,
       winnerUser.accessToken,
     );
 
     const playWinnerSong = await this.spotifyService.playTrackInPlaylist(
       room.playlistId,
-      winnerTrack,
+      winnerTrack.id,
       ownerUser.accessToken,
     );
 
@@ -165,10 +162,12 @@ export class RoomService {
     // Resta 3 puntos al usuario
     user.points -= 3;
 
+    const track = await this.spotifyService.getTrack(trackId, user.accessToken);
+
     // Agrega la nueva canción candidata al pool
     const newCandidate: ICandidate = {
       addedBy: userId,
-      track: trackId,
+      track,
       votes: [],
     };
 
@@ -192,7 +191,7 @@ export class RoomService {
     });
 
     const candidate = room.candidates.find(
-      (candidate: ICandidate) => candidate.track === trackId,
+      (candidate: ICandidate) => candidate.track.id === trackId,
     );
 
     candidate.votes.push(userId);

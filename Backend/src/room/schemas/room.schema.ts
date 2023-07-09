@@ -1,15 +1,35 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+const Track = {
+  id: String,
+  album: {
+    name: String,
+    images: [{ url: String }],
+  },
+  artists: [{ name: String }],
+  name: String,
+};
+
+export interface ITrack {
+  id: string;
+  album: {
+    name: string;
+    images: { url: string }[];
+  };
+  artists: { name: string }[];
+  name: string;
+}
+
 const Candidate = {
   addedBy: String,
-  track: String,
+  track: Track,
   votes: [{ type: String }],
 };
 
 export interface ICandidate {
   addedBy: string;
-  track: string;
+  track: ITrack;
   votes: string[];
 }
 
