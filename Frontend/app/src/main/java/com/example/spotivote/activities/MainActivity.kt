@@ -30,6 +30,7 @@ import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.CreateRoomScreen
 import com.example.spotivote.ui.screens.HomeScreen
 import com.example.spotivote.ui.screens.LoginScreen
+import com.example.spotivote.ui.screens.QrCodeGeneratorScreen
 import com.example.spotivote.ui.screens.QrCodeScannerScreen
 import com.example.spotivote.ui.screens.RoomByIdScreen
 import com.example.spotivote.ui.screens.SearchScreen
@@ -37,7 +38,6 @@ import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.launch
-import java.util.logging.SocketHandler
 
 
 class MainActivity : ComponentActivity() {
@@ -131,9 +131,17 @@ fun App() {
                 run {
                     navController.navigate("room-by-id")
                 }
+            }, onGoBack = {
+                run {
+                    navController.popBackStack()
+                }
             })
         }
+        composable("qr-code-generator/{roomId}") {
+            val roomId = it.arguments?.getString("roomId") ?: ""
 
+            QrCodeGeneratorScreen(user, roomId)
+        }
         composable("create-room") {
             CreateRoomScreen(accessToken, user, onCreateRoom = {
                 coroutineScope.launch {
@@ -166,9 +174,12 @@ fun App() {
                 run {
                     navController.navigate("suggest-track/$roomId")
                 }
+            }, onGoToQrCodeGenerator = {
+                run {
+                    navController.navigate("qr-code-generator/$roomId")
+                }
             })
         }
-
         composable("suggest-track/{roomId}") {
             val roomId = it.arguments?.getString("roomId") ?: ""
             SuggestTrackScreen(

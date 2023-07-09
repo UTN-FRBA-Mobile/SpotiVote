@@ -35,7 +35,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun QrCodeScannerScreen(onNavigateToJoinRoom: () -> Unit) {
+fun QrCodeScannerScreen(onNavigateToJoinRoom: () -> Unit, onGoBack: () -> Boolean) {
     var code by remember { mutableStateOf("") }
     var isPopupVisible by remember { mutableStateOf(false) }
     var isScanningEnabled by remember { mutableStateOf(true) }
@@ -43,19 +43,20 @@ fun QrCodeScannerScreen(onNavigateToJoinRoom: () -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val hasCamPermission = remember {
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED
+    var hasCamPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
     }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
-            if (granted) {
-                isPopupVisible = false
-            }
+            hasCamPermission = granted
+            if (!granted) onGoBack()
         }
     )
 
@@ -65,9 +66,8 @@ fun QrCodeScannerScreen(onNavigateToJoinRoom: () -> Unit) {
         }
     }
 
-
-    if (hasCamPermission) {
-        Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (hasCamPermission) {
             AndroidView(
                 factory = {
                     CompoundBarcodeView(context).apply {

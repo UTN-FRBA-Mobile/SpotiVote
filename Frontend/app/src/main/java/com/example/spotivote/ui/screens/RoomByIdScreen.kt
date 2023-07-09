@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.User
@@ -47,7 +49,11 @@ import okhttp3.Request
 
 @Composable
 fun RoomByIdScreen(
-    accessToken: String, user: User, roomId: String, onGoToSuggestTrack: () -> Unit
+    accessToken: String,
+    user: User,
+    roomId: String,
+    onGoToSuggestTrack: () -> Unit,
+    onGoToQrCodeGenerator: () -> Unit
 ) {
     val context = LocalContext.current
     val firebaseToken = MyPreferences.getFirebaseToken(context)
@@ -75,7 +81,7 @@ fun RoomByIdScreen(
     val listener = WebSocketListener(Callbacks(onRefetch = {
         coroutineScope.launch { refreshRoom() }
     }))
-    val ws = client.newWebSocket(request, listener)
+    client.newWebSocket(request, listener)
 
     Surface(
         modifier = Modifier
@@ -145,12 +151,38 @@ fun RoomByIdScreen(
                     Button(
                         onClick = {
                             sendNotificationToUser(firebaseToken, "Hi SpotiVote User!!!", context)
-                        }, modifier = Modifier
+                        },
+                        modifier = Modifier
                             .height(48.dp)
-                            .clip(RoundedCornerShape(100.dp))
+                            .clip(RoundedCornerShape(100.dp)),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colors.secondary,
+                            contentColor = Color.White
+                        ),
+                        elevation = ButtonDefaults.elevation(0.dp),
                     ) {
                         Text(
                             text = "Send notification",
+                            style = MaterialTheme.typography.button,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            onGoToQrCodeGenerator()
+                        },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(100.dp)),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colors.secondary,
+                            contentColor = Color.White
+                        ),
+                        elevation = ButtonDefaults.elevation(0.dp),
+                    ) {
+                        Text(
+                            text = "Generate QR Code",
                             style = MaterialTheme.typography.button,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
