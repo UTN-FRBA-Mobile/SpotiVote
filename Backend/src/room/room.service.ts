@@ -195,14 +195,21 @@ export class RoomService {
       this.spotifyService.getUser(userId, user.accessToken),
     ]);
 
-    // Agrega la nueva canción candidata al pool
-    const newCandidate: ICandidate = {
-      addedBy,
-      track,
-      votes: [],
-    };
+    // check if track is already in candidates
+    const trackAlreadyInCandidates = room.candidates.find(
+      (candidate) => candidate.track.id === track.id,
+    );
 
-    room.candidates.push(newCandidate);
+    if (!trackAlreadyInCandidates) {
+      // Agrega la nueva canción candidata al pool
+      const newCandidate: ICandidate = {
+        addedBy,
+        track,
+        votes: [],
+      };
+
+      room.candidates.push(newCandidate);
+    }
 
     // Guarda los cambios en la base de datos
     await room.save();

@@ -75,20 +75,8 @@ data class VoteRequest(
 )
 
 interface LocalService {
-    @GET("playlist/{id}")
-    suspend fun getTracksByPlaylistId(
-        @Path("id") playlistId: String,
-        @Header("access_token") authorization: String,
-    ): PlaylistResponse
 
-    @GET("playlist/{playlistId}/song/{songId}/")
-    suspend fun getSong(
-        @Path("playlistId") playlistId: String,
-        @Path("songId") songId: String,
-        @Header("access_token") authorization: String,
-    ): SongResponse
-
-    @POST("playlist/deviceToken")
+    @POST("device-token")
     suspend fun postDeviceToken(
         @Body body: DeviceTokenRequest,
     )

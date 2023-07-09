@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { PlaylistModule } from './playlist/playlist.module';
+import { DeviceTokenModule } from './device-token/device-token.module';
 import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
     MongooseModule.forRoot(process.env.MONGODB_URI),
     RoomModule,
-    PlaylistModule,
+    DeviceTokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
