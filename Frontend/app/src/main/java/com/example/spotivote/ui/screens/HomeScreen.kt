@@ -1,6 +1,7 @@
 package com.example.spotivote.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -109,24 +109,14 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
-                    onClick = {
-                        onNavigateToQrCodeScanner()
-                    },
+                Text(
+                    text = "Scan QR",
+                    style = MaterialTheme.typography.button,
+                    color = Color.Green,
                     modifier = Modifier
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(100.dp)),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.secondary, contentColor = Color.White
-                    ),
-                    elevation = ButtonDefaults.elevation(0.dp),
-                ) {
-                    Text(
-                        text = "Scan QR",
-                        style = MaterialTheme.typography.button,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                }
+                        .clickable { onNavigateToQrCodeScanner() }
+                        .padding(horizontal = 24.dp)
+                )
             }
         }
     }
