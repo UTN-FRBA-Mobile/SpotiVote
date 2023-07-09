@@ -28,8 +28,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.User
+import com.example.spotivote.service.Callbacks
 import com.example.spotivote.service.RoomResponse
 import com.example.spotivote.service.VoteRequest
+import com.example.spotivote.service.WebSocketListener
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.sendNotificationToUser
 import com.example.spotivote.service.localService
@@ -39,6 +41,8 @@ import com.example.spotivote.ui.components.TrackInPoll
 import com.example.spotivote.ui.components.TrackInPollTrack
 import com.example.spotivote.ui.components.VoteSection
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 @Composable
 fun RoomByIdScreen(
@@ -61,6 +65,20 @@ fun RoomByIdScreen(
         val fetchedRoomConfig = localService.getRoom(roomId)
         room = fetchedRoomConfig
     }
+
+    val client = OkHttpClient()
+    val socketUrl =
+        "ws://192.168.0.3:8055"
+    val request: Request = Request.Builder().url(socketUrl).build()
+
+    val listener = WebSocketListener(
+        Callbacks(
+            onRefetch = {
+                coroutineScope.launch { refreshRoom() }
+            }
+        )
+    )
+    val ws = client.newWebSocket(request, listener)
 
     Surface(
         modifier = Modifier
@@ -85,20 +103,6 @@ fun RoomByIdScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Button(
-                        onClick = {
-                            coroutineScope.launch { refreshRoom() }
-                        },
-                        modifier = Modifier
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(100.dp))
-                    ) {
-                        Text(
-                            text = "Refresh",
-                            style = MaterialTheme.typography.button,
-                            modifier = Modifier.padding(horizontal = 24.dp)
-                        )
-                    }
                     Spacer(modifier = Modifier.height(24.dp))
 
                     CurrentlyPlaying(candidate = room!!.currentTrack)

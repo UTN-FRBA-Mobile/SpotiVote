@@ -6,12 +6,10 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
 data class Callbacks(
-    val thumbsUp: (String) -> Unit,
-    val thumbsDown: (String) -> Unit,
+    val onRefetch: () -> Unit,
 )
 
 class WebSocketListener(private val callbacks: Callbacks) : WebSocketListener() {
-
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
         Log.i("WebSocketListener", "onOpen")
@@ -21,8 +19,7 @@ class WebSocketListener(private val callbacks: Callbacks) : WebSocketListener() 
         super.onMessage(webSocket, text)
         Log.i("WebSocketListener", text)
         when (text) {
-            "thumbsUp" -> callbacks.thumbsUp(text)
-            "thumbsDown" -> callbacks.thumbsDown(text)
+            "refetch" -> callbacks.onRefetch()
         }
     }
 
