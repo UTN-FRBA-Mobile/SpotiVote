@@ -18,7 +18,7 @@ services:
     ports:
       - 4001:3000
       - 9001:9229
-      - 8055:80
+      - 8055:81
     networks:
       - api-network
 

@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
 import com.example.spotivote.service.AddCandidateRequest
 import com.example.spotivote.service.CreateRoomRequest
+import com.example.spotivote.service.SocketIOService
 import com.example.spotivote.service.connectSpotifyAppRemote
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.registerToken
@@ -35,6 +36,7 @@ import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.launch
+import java.util.logging.SocketHandler
 
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +56,9 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         connectSpotifyAppRemote(this)
         registerToken(this)
+        SocketIOService.setSocket()
+        SocketIOService.establishConnection()
+        SocketIOService.setupNotifyListener()
     }
 
     override fun onStop() {
