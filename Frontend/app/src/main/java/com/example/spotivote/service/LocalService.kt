@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 val localhOkHttpClient = OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS).build()
 
-val localIpV4 = "192.168.0.3" // Set local IPv4
+val localIpV4 = "10.0.2.2" // Set local IPv4
 val localRetrofit = Retrofit.Builder().baseUrl("http://$localIpV4:4001/")
     .addConverterFactory(GsonConverterFactory.create()).client(localhOkHttpClient).build()
 

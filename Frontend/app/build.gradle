@@ -92,4 +92,10 @@ dependencies {
     // Zxing
     implementation 'com.google.zxing:core:3.3.3'
     implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
+
+
+    //Socket IO
+    implementation ('io.socket:socket.io-client:2.0.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 }
