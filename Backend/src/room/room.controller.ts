@@ -1,13 +1,14 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { CreateRoomDto } from './dto/create-room.dto';
-import { RoomService } from './room.service';
 import { AddCandidateDto } from './dto/add-candidate.dto';
+import { CreateRoomDto } from './dto/create-room.dto';
 import { VoteTrackDto } from './dto/vote-track.dto';
+import { RoomService } from './room.service';
 
 @Controller('rooms')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
+  // crear una sala
   @Post()
   create(@Body() createRoomDto: CreateRoomDto) {
     return this.roomService.create(createRoomDto);

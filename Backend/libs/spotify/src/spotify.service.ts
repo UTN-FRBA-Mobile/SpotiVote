@@ -1,10 +1,9 @@
+import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
+import { lastValueFrom } from 'rxjs';
+import { CreatedPlaylist, Playlist, User } from './contracts/playlist-response';
 import { SPOTIFY_MODULE_OPTIONS_TOKEN } from './interfaces/spotify-module-definition';
 import { SpotifyModuleOptions } from './interfaces/spotify-module-options';
-import { HttpService } from '@nestjs/axios';
-import * as crypto from 'crypto';
-import { lastValueFrom } from 'rxjs';
-import { Playlist, User } from './contracts/playlist-response';
 
 @Injectable()
 export class SpotifyService {
@@ -12,7 +11,7 @@ export class SpotifyService {
   constructor(
     @Inject(SPOTIFY_MODULE_OPTIONS_TOKEN) private options: SpotifyModuleOptions,
     private httpService: HttpService,
-  ) { }
+  ) {}
 
   private async authorize() {
     if (!this.authorized) {
@@ -86,16 +85,122 @@ export class SpotifyService {
     const auth = this.authorized;
 
     const addedByResponse = await lastValueFrom(
-      this.httpService.get<User>(
-        `https://api.spotify.com/v1/users/${userId}`,
+      this.httpService.get<User>(`https://api.spotify.com/v1/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${auth}`,
+        },
+      }),
+    );
+
+    return addedByResponse.data;
+  }
+
+  public async createPlaylist(
+    userId: string,
+    name: string,
+    description: string,
+    accessToken: string,
+  ) {
+    const response = await lastValueFrom(
+      this.httpService.post<CreatedPlaylist>(
+        `https://api.spotify.com/v1/users/${userId}/playlists`,
+        {
+          name,
+          public: false,
+          collaborative: true,
+          description,
+        },
         {
           headers: {
-            Authorization: `Bearer ${auth}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         },
       ),
     );
 
-    return addedByResponse.data;
+    return response.data;
+  }
+
+  public async getPlaylist(playlistId: string, accessToken: string) {
+    const response = await lastValueFrom(
+      this.httpService.get<Playlist>(
+        `https://api.spotify.com/v1/playlists/${playlistId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    );
+
+    return response.data;
+  }
+
+  public async addTrackToPlaylist(
+    playlistId: string,
+    trackId: string,
+    accessToken: string,
+  ) {
+    const response = await lastValueFrom(
+      this.httpService.post<{
+        snapshot_id: string;
+      }>(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+        {
+          uris: [`spotify:track:${trackId}`],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    );
+
+    return response.data;
+  }
+
+  public async transferPlayback(deviceId: string, accessToken: string) {
+    const response = await lastValueFrom(
+      this.httpService.put(
+        `https://api.spotify.com/v1/me/player`,
+        {
+          device_ids: [deviceId],
+          play: false,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    );
+
+    return response.data;
+  }
+
+  public async playTrackInPlaylist(
+    playlistId: string,
+    trackId: string,
+    accessToken: string,
+  ) {
+    const response = await lastValueFrom(
+      this.httpService.put(
+        `https://api.spotify.com/v1/me/player/play`,
+        {
+          context_uri: `spotify:playlist:${playlistId}`,
+          offset: {
+            uri: `spotify:track:${trackId}`,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    );
+
+    return response.data;
   }
 }

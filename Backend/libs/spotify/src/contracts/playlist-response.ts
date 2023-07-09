@@ -41,3 +41,12 @@ export interface Album {
 export interface AlbumImage {
   url: string;
 }
+
+export type CreatedPlaylist = {
+  type: 'playlist';
+  collaborative: boolean;
+  description: string;
+  id: string;
+  name: string;
+  uri: string;
+};

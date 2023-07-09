@@ -3,8 +3,6 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { lastValueFrom } from 'rxjs';
-import { CreatedPlaylist, SpotifyPlaylist } from 'src/types';
 import { randomFromList, shuffle } from 'src/utils';
 import { AddCandidateDto } from './dto/add-candidate.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
@@ -23,36 +21,14 @@ export class RoomService {
     const { name, basePlaylistId, deviceId, owner, accessToken } =
       createRoomDto;
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    };
-
     const [playlist, basePlaylist] = await Promise.all([
-      lastValueFrom(
-        this.httpService.post<CreatedPlaylist>(
-          `https://api.spotify.com/v1/users/${owner}/playlists`,
-          {
-            name,
-            public: false,
-            collaborative: true,
-            description: 'Playlist created by SpotiVote',
-          },
-          config,
-        ),
-      ),
-      lastValueFrom(
-        this.httpService.get<SpotifyPlaylist>(
-          `https://api.spotify.com/v1/playlists/${basePlaylistId}`,
-          config,
-        ),
-      ),
+      this.spotifyService.createPlaylist(owner, name, '', accessToken),
+      this.spotifyService.getPlaylist(basePlaylistId, accessToken),
     ]);
 
-    const firstTrack = randomFromList(basePlaylist.data.tracks.items);
+    const firstTrack = randomFromList(basePlaylist.tracks.items);
 
-    const pool = basePlaylist.data.tracks.items.filter(
+    const pool = basePlaylist.tracks.items.filter(
       (track) => track.track.id !== firstTrack.track.id,
     );
 
@@ -66,42 +42,34 @@ export class RoomService {
         };
       });
 
-    const addFirstTrack = await lastValueFrom(
-      this.httpService.post(
-        `https://api.spotify.com/v1/playlists/${playlist.data.id}/tracks`,
-        {
-          uris: [`spotify:track:${firstTrack.track.id}`],
-        },
-        config,
-      ),
+    const addFirstTrack = await this.spotifyService.addTrackToPlaylist(
+      playlist.id,
+      firstTrack.track.id,
+      accessToken,
     );
 
-    const transferPlayback = await lastValueFrom(
-      this.httpService.put(
-        `https://api.spotify.com/v1/me/player`,
-        {
-          device_ids: [deviceId],
-          play: false,
-        },
-        config,
-      ),
-    );
+    const transferPlayback = await this.spotifyService.transferPlayback(
+      deviceId,
+      accessToken,
+    ).catch(e => {
+      console.log('Error transferPlayback')
+      console.log(e)
+    });
 
-    const playFirstSong = await lastValueFrom(
-      this.httpService.put(
-        `https://api.spotify.com/v1/me/player/play`,
-        {
-          context_uri: `spotify:playlist:${playlist.data.id}`,
-        },
-        config,
-      ),
-    );
+    const playFirstSong = await this.spotifyService.playTrackInPlaylist(
+      playlist.id,
+      firstTrack.track.id,
+      accessToken,
+      ).catch(e => {
+        console.log('Error playFirstSong')
+        console.log(e)
+      });
 
     const newRoom = await this.roomModel.create({
       name,
       deviceId,
       basePlaylistId,
-      playlistId: playlist.data.id,
+      playlistId: playlist.id,
       users: [{ id: owner, points: 10, accessToken }],
       owner: owner,
       candidates: randomTracks,
@@ -126,14 +94,6 @@ export class RoomService {
   async closeVotingAndAddToPlaylist(roomId: string) {
     const room = await this.roomModel.findById(roomId).exec();
 
-    if (room === null) {
-      throw new Error('Room not found');
-    }
-
-    if (room.candidates.length === 0) {
-      throw new Error('No candidates available');
-    }
-
     // Obtener el candidato más votado
     const sortedCandidates = [...room.candidates].sort(
       (a, b) => b.votes.length - a.votes.length,
@@ -144,18 +104,11 @@ export class RoomService {
 
     const ownerUser = room.users.find((u) => u.id === room.owner);
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${winnerUser.accessToken}`,
-      },
-    };
-    const basePlaylist = await lastValueFrom(
-      this.httpService.get<SpotifyPlaylist>(
-        `https://api.spotify.com/v1/playlists/${room.basePlaylistId}`,
-        config,
-      ),
+    const basePlaylist = await this.spotifyService.getPlaylist(
+      room.basePlaylistId,
+      ownerUser.accessToken,
     );
-    const pool = basePlaylist.data.tracks.items.filter(
+    const pool = basePlaylist.tracks.items.filter(
       (track) => track.track.id !== winnerTrack,
     );
 
@@ -173,41 +126,16 @@ export class RoomService {
 
     room.currentTrack = mostVotedCandidate;
 
-    const addFirstTrack = await lastValueFrom(
-      this.httpService.post(
-        `https://api.spotify.com/v1/playlists/${room.playlistId}/tracks`,
-        {
-          uris: [`spotify:track:${winnerTrack}`],
-        },
-        config,
-      ),
+    const addWinnerTrack = await this.spotifyService.addTrackToPlaylist(
+      room.playlistId,
+      winnerTrack,
+      winnerUser.accessToken,
     );
 
-    const transferPlayback = await lastValueFrom(
-      this.httpService.put(
-        `https://api.spotify.com/v1/me/player`,
-        {
-          device_ids: [room.deviceId],
-          play: false,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${ownerUser.accessToken}`,
-          },
-        },
-      ),
-    );
-
-    const playNextSong = await lastValueFrom(
-      this.httpService.post(
-        `https://api.spotify.com/v1/me/player/next`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${ownerUser.accessToken}`,
-          },
-        },
-      ),
+    const playWinnerSong = await this.spotifyService.playTrackInPlaylist(
+      room.playlistId,
+      winnerTrack,
+      ownerUser.accessToken,
     );
 
     room.candidates = randomTracks;
