@@ -35,8 +35,14 @@ data class CandidateTrack(
     val artists: List<Artist>,
 )
 
+data class CandidateAddedBy(
+    val id: String,
+    val displayName: String,
+    val profileImage: String,
+)
+
 data class Candidate(
-    val addedBy: String,
+    val addedBy: CandidateAddedBy,
     val track: CandidateTrack,
     val votes: List<String>,
 )

@@ -30,7 +30,6 @@ import com.example.spotivote.ui.screens.HomeScreen
 import com.example.spotivote.ui.screens.LoginScreen
 import com.example.spotivote.ui.screens.QrCodeScannerScreen
 import com.example.spotivote.ui.screens.RoomByIdScreen
-import com.example.spotivote.ui.screens.RoomConfig
 import com.example.spotivote.ui.screens.SearchScreen
 import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
@@ -70,11 +69,9 @@ class MainActivity : ComponentActivity() {
 fun App() {
     val navController = rememberNavController()
     val activity = LocalContext.current as Activity
-    var accessToken by remember { mutableStateOf("") }
     var deviceToken: String? by remember { mutableStateOf("") }
-    var roomConfig by remember {
-        mutableStateOf(RoomConfig("", "", "", activity))
-    }
+
+    var accessToken by remember { mutableStateOf("") }
     var user by remember { mutableStateOf(User("", "", "")) }
 
     val coroutineScope = rememberCoroutineScope()
@@ -113,6 +110,7 @@ fun App() {
                 }
             })
         }
+
         composable("qr-code-scanner") {
             QrCodeScannerScreen(onNavigateToJoinRoom = {
                 run {
@@ -120,15 +118,15 @@ fun App() {
                 }
             })
         }
+
         composable("create-room") {
             CreateRoomScreen(accessToken, user, onCreateRoom = {
-                roomConfig = it
                 coroutineScope.launch {
                     val response = localService.createRoom(
                         CreateRoomRequest(
-                            roomConfig.name,
-                            roomConfig.device,
-                            roomConfig.playlistId,
+                            it.name,
+                            it.device,
+                            it.playlistId,
                             user.id,
                             accessToken
                         )
@@ -155,6 +153,7 @@ fun App() {
                 }
             })
         }
+
         composable("suggest-track/{roomId}") {
             val roomId = it.arguments?.getString("roomId") ?: ""
             SuggestTrackScreen(

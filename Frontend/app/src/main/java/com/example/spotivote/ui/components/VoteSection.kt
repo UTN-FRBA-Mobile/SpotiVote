@@ -1,7 +1,5 @@
 package com.example.spotivote.ui.components
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,24 +20,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.spotivote.model.Track
-import com.example.spotivote.service.Callbacks
-import com.example.spotivote.service.WebSocketListener
-import com.example.spotivote.service.localService
-import com.example.spotivote.ui.screens.RoomConfig
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import com.example.spotivote.model.User
 
 
 data class TrackInPollTrack(
@@ -48,12 +35,11 @@ data class TrackInPollTrack(
     val artists: String = "",
     val imageUri: String? = ""
 )
-data class TrackInPoll(val track: TrackInPollTrack, var votes: Int)
+
+data class TrackInPoll(val track: TrackInPollTrack, val votes: List<String>)
 
 @Composable
-fun VoteSection(tracks: List<TrackInPoll>, onVote: (String) -> Unit) {
-    var trackId by remember { mutableStateOf("") }
-
+fun VoteSection(tracks: List<TrackInPoll>, user: User, onVote: (String) -> Unit) {
     Column(
         modifier = Modifier.padding(top = 12.dp)
     ) {
@@ -67,20 +53,18 @@ fun VoteSection(tracks: List<TrackInPoll>, onVote: (String) -> Unit) {
         ) {
             LazyColumn {
                 items(items = tracks, itemContent = { trackInPoll ->
+                    val isVoted = trackInPoll.votes.contains(user.id)
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp)
                             .align(Alignment.CenterStart)
                             .clickable(onClick = {
-                                // vote
-                                trackId = trackInPoll.track.id
                                 onVote(trackInPoll.track.id)
                             })
                             .background(
-                                color = if (trackId == trackInPoll.track.id) Color(
-                                    0xFF303030
-                                ) else Color.Transparent
+                                color = Color.Transparent
                             )
                     ) {
                         Row() {
@@ -100,7 +84,7 @@ fun VoteSection(tracks: List<TrackInPoll>, onVote: (String) -> Unit) {
                                 Text(
                                     text = trackInPoll.track.name,
                                     style = MaterialTheme.typography.body1,
-                                    color = if (trackId == trackInPoll.track.id) Color.Green else Color.White
+                                    color = if (isVoted) Color.Green else Color.White
                                 )
                                 Text(
                                     text = trackInPoll.track.artists,
@@ -122,7 +106,7 @@ fun VoteSection(tracks: List<TrackInPoll>, onVote: (String) -> Unit) {
                                         .size(36.dp)
                                         .clip(CircleShape)
                                         .background(
-                                            color = if (trackId == trackInPoll.track.id) Color.Green else Color(
+                                            color = if (isVoted) Color.Green else Color(
                                                 0xFF303030
                                             )
                                         ),
@@ -130,9 +114,9 @@ fun VoteSection(tracks: List<TrackInPoll>, onVote: (String) -> Unit) {
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(8.dp),
-                                        text = trackInPoll.votes.toString(),
+                                        text = trackInPoll.votes.size.toString(),
                                         style = MaterialTheme.typography.body1,
-                                        color = if (trackId == trackInPoll.track.id) Color.Black else Color.White
+                                        color = if (isVoted) Color.Black else Color.White
                                     )
                                 }
                             }

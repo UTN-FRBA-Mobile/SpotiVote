@@ -56,6 +56,12 @@ fun RoomByIdScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
+    // refresh
+    suspend fun refreshRoom() {
+        val fetchedRoomConfig = localService.getRoom(roomId)
+        room = fetchedRoomConfig
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -79,6 +85,20 @@ fun RoomByIdScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    Button(
+                        onClick = {
+                            coroutineScope.launch { refreshRoom() }
+                        },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(100.dp))
+                    ) {
+                        Text(
+                            text = "Refresh",
+                            style = MaterialTheme.typography.button,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(24.dp))
 
                     CurrentlyPlaying(candidate = room!!.currentTrack)
@@ -94,9 +114,10 @@ fun RoomByIdScreen(
                                     candidate.track.artists.joinToString(", ") { it.name },
                                     candidate.track.album.images[0].url,
                                 ),
-                                votes = candidate.votes.size,
+                                votes = candidate.votes,
                             )
                         },
+                        user,
                         onVote = { trackId ->
                             coroutineScope.launch {
                                 room = localService.vote(

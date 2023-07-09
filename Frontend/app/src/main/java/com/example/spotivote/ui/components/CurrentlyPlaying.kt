@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -123,74 +124,30 @@ fun CurrentlyPlaying(
         Column {
             Text(text = "Added by", style = MaterialTheme.typography.h6)
             Spacer(modifier = Modifier.height(8.dp))
-            /*
-            * Box(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(6.dp))
                     .background(color = Color(0xFF404040))
                     .padding(12.dp)
             ) {
-                if (user != null) {
-                    Row {
-                        AsyncImage(
-                            model = user!!.imageUri,
-                            contentDescription = "User Image",
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .size(36.dp)
-                                .fillMaxSize()
-                        )
-                        Spacer(
-                            modifier = Modifier.width(12.dp)
-                        )
-                        Text(
-                            text = user!!.displayName, style = MaterialTheme.typography.body1
-                        )
-                    }
-                } else {
-                    Text(
-                        text = "No data",
-                        modifier = Modifier.padding(16.dp)
+                Row {
+                    AsyncImage(
+                        model = candidate.addedBy.profileImage,
+                        contentDescription = "User Image",
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .size(36.dp)
+                            .fillMaxSize()
                     )
-                    Box(
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Button(
-                            onClick = { /* Button 2 clicked */ },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text(
-                                text = "\uD83D\uDC4E",
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.size(24.dp) // Adjust the size of the emoji as needed
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Box(
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Button(
-                            onClick = { /* Button 1 clicked */ },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text(
-                                text = "\uD83D\uDC4D",
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.size(24.dp) // Adjust the size of the emoji as needed
-                            )
-                        }
-                    }
+                    Spacer(
+                        modifier = Modifier.width(12.dp)
+                    )
+                    Text(
+                        text = candidate.addedBy.displayName, style = MaterialTheme.typography.body1
+                    )
                 }
             }
-            * */
         }
     }
 }
