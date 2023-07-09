@@ -9,16 +9,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
+import com.example.spotivote.service.AddCandidateRequest
+import com.example.spotivote.service.CreateRoomRequest
 import com.example.spotivote.service.connectSpotifyAppRemote
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.registerToken
 import com.example.spotivote.service.firebase.registerTokenDB
+import com.example.spotivote.service.localService
 import com.example.spotivote.service.spotifyAppRemote
 import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.CreateRoomScreen
@@ -31,6 +35,7 @@ import com.example.spotivote.ui.screens.SearchScreen
 import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
 import com.spotify.android.appremote.api.SpotifyAppRemote
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -71,6 +76,8 @@ fun App() {
         mutableStateOf(RoomConfig("", "", "", activity))
     }
     var user by remember { mutableStateOf(User("", "", "")) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     suspend fun getUser() {
         val response = spotifyService.getMe("Bearer $accessToken")
@@ -116,8 +123,17 @@ fun App() {
         composable("create-room") {
             CreateRoomScreen(accessToken, user, onCreateRoom = {
                 roomConfig = it
-                run {
-                    navController.navigate("room-by-id")
+                coroutineScope.launch {
+                    val response = localService.createRoom(
+                        CreateRoomRequest(
+                            roomConfig.name,
+                            roomConfig.device,
+                            roomConfig.playlistId,
+                            user.id,
+                            accessToken
+                        )
+                    )
+                    navController.navigate("room-by-id/${response._id}")
                 }
             })
         }
@@ -131,19 +147,26 @@ fun App() {
 //            })
 //        }
 
-        composable("room-by-id") {
-            RoomByIdScreen(accessToken, user, roomConfig, onGoToSuggestTrack = {
+        composable("room-by-id/{roomId}") {
+            val roomId = it.arguments?.getString("roomId") ?: ""
+            RoomByIdScreen(accessToken, user, roomId, onGoToSuggestTrack = {
                 run {
-                    navController.navigate("suggest-track")
+                    navController.navigate("suggest-track/$roomId")
                 }
             })
         }
-        composable("suggest-track") {
-            SuggestTrackScreen(accessToken, user, onSuggestTrack = {
-                run {
-                    navController.navigate("search")
-                }
-            })
+        composable("suggest-track/{roomId}") {
+            val roomId = it.arguments?.getString("roomId") ?: ""
+            SuggestTrackScreen(
+                accessToken = accessToken,
+                user = user,
+                onSuggestTrack = { trackId, userId ->
+                    coroutineScope.launch {
+                        val response =
+                            localService.addCandidate(roomId, AddCandidateRequest(trackId, userId))
+                        navController.navigate("room-by-id/${roomId}")
+                    }
+                })
         }
         composable("search") {
             SearchScreen(accessToken, onSearchTrack = {

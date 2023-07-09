@@ -11,28 +11,50 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.User
+import com.example.spotivote.service.RoomResponse
+import com.example.spotivote.service.VoteRequest
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.sendNotificationToUser
+import com.example.spotivote.service.localService
 import com.example.spotivote.ui.components.CurrentlyPlaying
 import com.example.spotivote.ui.components.NavBar
+import com.example.spotivote.ui.components.TrackInPoll
+import com.example.spotivote.ui.components.TrackInPollTrack
 import com.example.spotivote.ui.components.VoteSection
+import kotlinx.coroutines.launch
 
 @Composable
 fun RoomByIdScreen(
-    accessToken: String, user: User, roomConfig: RoomConfig, onGoToSuggestTrack: () -> Unit
+    accessToken: String, user: User, roomId: String, onGoToSuggestTrack: () -> Unit
 ) {
     val context = LocalContext.current
     val firebaseToken = MyPreferences.getFirebaseToken(context)
+    var room by remember { mutableStateOf<RoomResponse?>(null) }
+
+    LaunchedEffect(roomId) {
+        // Utilizar el roomId para obtener los datos de la sala
+        val fetchedRoomConfig = localService.getRoom(roomId)
+        room = fetchedRoomConfig
+    }
+
+    val coroutineScope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier
@@ -40,60 +62,83 @@ fun RoomByIdScreen(
             .verticalScroll(rememberScrollState()),
         color = MaterialTheme.colors.background
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            NavBar(user = user)
+        if (room != null) {
             Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    text = "Room ${roomConfig.name}",
-                    style = MaterialTheme.typography.h1,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                CurrentlyPlaying(roomConfig = roomConfig, accessToken = accessToken)
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                VoteSection(roomConfig = roomConfig, accessToken = accessToken)
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = { onGoToSuggestTrack() },
+                NavBar(user = user)
+                Column(
                     modifier = Modifier
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(100.dp))
+                        .fillMaxHeight()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "Suggest Track",
-                        style = MaterialTheme.typography.button,
-                        modifier = Modifier.padding(horizontal = 24.dp)
+                        text = "Room ${room!!.name}",
+                        style = MaterialTheme.typography.h1,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = {
-                        sendNotificationToUser(firebaseToken,"Hi SpotiVote User!!!", context)
-                    },
-                    modifier = Modifier
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(100.dp))
-                ) {
-                    Text(
-                        text = "Send notification",
-                        style = MaterialTheme.typography.button,
-                        modifier = Modifier.padding(horizontal = 24.dp)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    CurrentlyPlaying(candidate = room!!.currentTrack)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    VoteSection(
+                        tracks = room!!.candidates.map { candidate ->
+                            TrackInPoll(
+                                track = TrackInPollTrack(
+                                    candidate.track.id,
+                                    candidate.track.name,
+                                    candidate.track.artists.joinToString(", ") { it.name },
+                                    candidate.track.album.images[0].url,
+                                ),
+                                votes = candidate.votes.size,
+                            )
+                        },
+                        onVote = { trackId ->
+                            coroutineScope.launch {
+                                room = localService.vote(
+                                    roomId,
+                                    VoteRequest(trackId, user.id)
+                                )
+                            }
+                        }
                     )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { onGoToSuggestTrack() },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(100.dp))
+                    ) {
+                        Text(
+                            text = "Suggest Track",
+                            style = MaterialTheme.typography.button,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            sendNotificationToUser(firebaseToken, "Hi SpotiVote User!!!", context)
+                        }, modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(100.dp))
+                    ) {
+                        Text(
+                            text = "Send notification",
+                            style = MaterialTheme.typography.button,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
                 }
             }
+        } else {
+            CircularProgressIndicator()
         }
     }
 }

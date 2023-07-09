@@ -38,7 +38,9 @@ import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.components.NavBar
 
 @Composable
-fun SuggestTrackScreen(accessToken: String, user: User, onSuggestTrack: () -> Unit) {
+fun SuggestTrackScreen(
+    accessToken: String, user: User, onSuggestTrack: (trackId: String, userId: String) -> Unit
+) {
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
     var trackId by remember { mutableStateOf("") }
 
@@ -144,39 +146,43 @@ fun SuggestTrackScreen(accessToken: String, user: User, onSuggestTrack: () -> Un
                             }
                         }
 
-                        Box(modifier = Modifier
-                            .clip(
-                                shape = RoundedCornerShape(
-                                    bottomStart = 6.dp, bottomEnd = 6.dp
-                                )
-                            )
-                            .background(color = Color(0xFF404040))
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .clickable { onSuggestTrack() }) {
-                            Text(
-                                text = "Search another",
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .padding(horizontal = 24.dp)
-                            )
-                        }
+//                        Box(modifier = Modifier
+//                            .clip(
+//                                shape = RoundedCornerShape(
+//                                    bottomStart = 6.dp, bottomEnd = 6.dp
+//                                )
+//                            )
+//                            .background(color = Color(0xFF404040))
+//                            .fillMaxWidth()
+//                            .height(50.dp)
+//                            .clickable { onSuggestTrack() }) {
+//                            Text(
+//                                text = "Search another",
+//                                modifier = Modifier
+//                                    .align(Alignment.Center)
+//                                    .padding(horizontal = 24.dp)
+//                            )
+//                        }
                     }
                 }
 
                 Spacer(
                     modifier = Modifier.defaultMinSize(minHeight = 24.dp)
                 )
-                Button(
-                    onClick = {}, modifier = Modifier
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(100.dp))
-                ) {
-                    Text(
-                        text = "Suggest Track",
-                        style = MaterialTheme.typography.button,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
+                if (trackId != "") {
+                    Button(
+                        onClick = {
+                            onSuggestTrack(trackId, user.id)
+                        }, modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(100.dp))
+                    ) {
+                        Text(
+                            text = "Suggest Track",
+                            style = MaterialTheme.typography.button,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
                 }
             }
         }

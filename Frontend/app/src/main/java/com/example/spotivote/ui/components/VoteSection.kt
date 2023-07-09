@@ -42,56 +42,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 
-data class TrackInPoll(val track: Track, var votes: Int)
+data class TrackInPollTrack(
+    val id: String = "",
+    val name: String = "",
+    val artists: String = "",
+    val imageUri: String? = ""
+)
+data class TrackInPoll(val track: TrackInPollTrack, var votes: Int)
 
 @Composable
-fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
-    var tracks by remember { mutableStateOf<List<TrackInPoll>>(emptyList()) }
+fun VoteSection(tracks: List<TrackInPoll>, onVote: (String) -> Unit) {
     var trackId by remember { mutableStateOf("") }
-
-    // cambiar para que vaya a buscar las que se pueden votar ahora...
-    LaunchedEffect(Unit) {
-        // val playlist =
-        //    spotifyService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
-        try {
-            val playlistRes =
-                localService.getTracksByPlaylistId(roomConfig.playlistId, "Bearer $accessToken")
-
-            tracks = playlistRes.songs.map { it ->
-                TrackInPoll(
-                    Track(
-                        _id = it._id,
-                        id = it.id,
-                        name = it.trackName,
-                        artists = it.artist,
-                        imageUri = playlistRes.playlist.albumImageUri
-                    ), 0
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Local service backend error", e)
-        }
-    }
-
-    val client = OkHttpClient()
-    val socketUrl =
-        "wss://s9157.nyc1.piesocket.com/v3/1?api_key=SqxisaikNnHg4X7o3DxtIm7sAPCz6ho8Wu9Z76PF&notify_self=1"
-    val request: Request = Request.Builder().url(socketUrl).build()
-
-    val listener = WebSocketListener(
-        Callbacks(
-            thumbsDown = {
-                println("Thumbs down")
-                tracks[0].votes = (tracks[0].votes - 1).coerceAtLeast(0)
-            },
-            thumbsUp = {
-                println("Thumbs up")
-                tracks[0].votes += 1
-            },
-        )
-    )
-    val ws = client.newWebSocket(request, listener)
-
 
     Column(
         modifier = Modifier.padding(top = 12.dp)
@@ -114,6 +75,7 @@ fun VoteSection(roomConfig: RoomConfig, accessToken: String) {
                             .clickable(onClick = {
                                 // vote
                                 trackId = trackInPoll.track.id
+                                onVote(trackInPoll.track.id)
                             })
                             .background(
                                 color = if (trackId == trackInPoll.track.id) Color(
