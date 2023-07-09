@@ -1,6 +1,5 @@
 package com.example.spotivote.service
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Log
@@ -9,7 +8,7 @@ import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 
 object QrCodeGeneratorHandler {
-    fun generateQrCode(context: Context, data: String): Bitmap? {
+    fun generateQrCode(data: String): Bitmap? {
         if (data.isEmpty()) {
             Log.d("QR GEN", "generateQrCode empty data")
             //Toast.makeText( context: context, text: "enter some data", Toast.LENGTH_SHORT).show()

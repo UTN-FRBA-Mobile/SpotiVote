@@ -127,9 +127,9 @@ fun App() {
         }
 
         composable("qr-code-scanner") {
-            QrCodeScannerScreen(onNavigateToJoinRoom = {
+            QrCodeScannerScreen(onNavigateToRoom = {
                 run {
-                    navController.navigate("room-by-id")
+                    navController.navigate("room-by-id/$it")
                 }
             }, onGoBack = {
                 run {
@@ -140,7 +140,11 @@ fun App() {
         composable("qr-code-generator/{roomId}") {
             val roomId = it.arguments?.getString("roomId") ?: ""
 
-            QrCodeGeneratorScreen(user, roomId)
+            QrCodeGeneratorScreen(user, roomId, onGoBack =  {
+                run {
+                    navController.popBackStack()
+                }
+            })
         }
         composable("create-room") {
             CreateRoomScreen(accessToken, user, onCreateRoom = {

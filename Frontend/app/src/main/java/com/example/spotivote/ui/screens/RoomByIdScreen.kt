@@ -1,5 +1,6 @@
 package com.example.spotivote.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -11,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -147,46 +147,36 @@ fun RoomByIdScreen(
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
                     }
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = {
-                            sendNotificationToUser(firebaseToken, "Hi SpotiVote User!!!", context)
-                        },
+
+                    Text(
+                        text = "Send notification",
+                        style = MaterialTheme.typography.button,
+                        color = Color.Green,
                         modifier = Modifier
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(100.dp)),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.secondary,
-                            contentColor = Color.White
-                        ),
-                        elevation = ButtonDefaults.elevation(0.dp),
-                    ) {
-                        Text(
-                            text = "Send notification",
-                            style = MaterialTheme.typography.button,
-                            modifier = Modifier.padding(horizontal = 24.dp)
-                        )
-                    }
+                            .clickable {
+                                sendNotificationToUser(
+                                    firebaseToken,
+                                    "Hi SpotiVote User!!!",
+                                    context
+                                )
+                            }
+                            .padding(horizontal = 24.dp)
+                    )
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = {
-                            onGoToQrCodeGenerator()
-                        },
+
+                    Text(
+                        text = "Generate QR Code",
+                        style = MaterialTheme.typography.button,
+                        color = Color.Green,
                         modifier = Modifier
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(100.dp)),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.secondary,
-                            contentColor = Color.White
-                        ),
-                        elevation = ButtonDefaults.elevation(0.dp),
-                    ) {
-                        Text(
-                            text = "Generate QR Code",
-                            style = MaterialTheme.typography.button,
-                            modifier = Modifier.padding(horizontal = 24.dp)
-                        )
-                    }
+                            .clickable {
+                                onGoToQrCodeGenerator()
+                            }
+                            .padding(horizontal = 24.dp)
+                    )
                 }
             }
         } else {
