@@ -1,7 +1,6 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import { RedisIoAdapter } from './playlist/adapters/redisio-adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +9,10 @@ async function bootstrap() {
   // await redisIoAdapter.connectToRedis();
 
   // app.useWebSocketAdapter(redisIoAdapter);
+
+  app.enableCors({
+    origin: '*',
+  });
 
   await app.listen(3000);
 }
