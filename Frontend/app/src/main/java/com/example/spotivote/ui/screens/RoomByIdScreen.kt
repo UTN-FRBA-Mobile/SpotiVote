@@ -1,5 +1,6 @@
 package com.example.spotivote.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,7 +36,6 @@ import com.example.spotivote.service.JoinRoomRequest
 import com.example.spotivote.service.RoomResponse
 import com.example.spotivote.service.VoteRequest
 import com.example.spotivote.service.WebSocketListener
-import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.sendNotificationToUser
 import com.example.spotivote.service.localService
 import com.example.spotivote.ui.components.CurrentlyPlaying
@@ -56,9 +56,7 @@ fun RoomByIdScreen(
     onGoToQrCodeGenerator: () -> Unit
 ) {
     val context = LocalContext.current
-    val firebaseToken = MyPreferences.getFirebaseToken(context)
     var room by remember { mutableStateOf<RoomResponse?>(null) }
-
 
     LaunchedEffect(roomId) {
         // Utilizar el roomId para obtener los datos de la sala
@@ -151,16 +149,22 @@ fun RoomByIdScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "Send notification",
+                        text = "Send invitations",
                         style = MaterialTheme.typography.button,
                         color = Color.Green,
                         modifier = Modifier
                             .clickable {
-                                sendNotificationToUser(
-                                    firebaseToken,
-                                    "Hi SpotiVote User!!!",
-                                    context
-                                )
+                                coroutineScope.launch {
+                                    val tokensResponse = localService.getAllDeviceTokens()
+                                    tokensResponse.map {
+                                        if(it.userId != user.id)
+                                            sendNotificationToUser(
+                                                it.deviceToken,
+                                                "You are invited to the room ${room!!.name}"
+                                            )
+                                    }
+                                    Toast.makeText(context, "The invitations has been sent!", Toast.LENGTH_LONG).show()
+                                }
                             }
                             .padding(horizontal = 24.dp)
                     )

@@ -11,6 +11,10 @@ export class DeviceTokenService {
     private readonly deviceTokenModel: Model<DeviceToken>,
   ) {}
 
+  async getAllDeviceTokens(): Promise<DeviceToken[]> {
+    return this.deviceTokenModel.find().exec();
+  }
+  
   async createDeviceToken(
     createTokenDto: CreateDeviceTokenDto,
   ): Promise<DeviceToken> {
