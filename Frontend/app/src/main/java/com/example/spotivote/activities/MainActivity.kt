@@ -19,13 +19,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
 import com.example.spotivote.service.AddCandidateRequest
 import com.example.spotivote.service.CreateRoomRequest
-import com.example.spotivote.service.SocketIOService
-import com.example.spotivote.service.connectSpotifyAppRemote
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.registerToken
 import com.example.spotivote.service.firebase.registerTokenDB
 import com.example.spotivote.service.localService
-import com.example.spotivote.service.spotifyAppRemote
 import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.CreateRoomScreen
 import com.example.spotivote.ui.screens.HomeScreen
@@ -36,7 +33,6 @@ import com.example.spotivote.ui.screens.RoomByIdScreen
 import com.example.spotivote.ui.screens.SearchScreen
 import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
-import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.launch
 
 
@@ -48,25 +44,22 @@ class MainActivity : ComponentActivity() {
                 App()
             }
         }
-
-        // reloadButton.setOnClickListener { setFirebaseTokenInView() }
-        // subscribeButton.setOnClickListener { subscribeToTopic() }
     }
 
     override fun onStart() {
         super.onStart()
-        connectSpotifyAppRemote(this)
+        //connectSpotifyAppRemote(this)
         registerToken(this)
-        SocketIOService.setSocket()
-        SocketIOService.establishConnection()
-        SocketIOService.setupNotifyListener()
+        //SocketIOService.setSocket()
+        //SocketIOService.establishConnection()
+        //SocketIOService.setupNotifyListener()
     }
 
     override fun onStop() {
         super.onStop()
-        spotifyAppRemote?.let {
+        /*spotifyAppRemote?.let {
             SpotifyAppRemote.disconnect(it)
-        }
+        }*/
     }
 }
 
