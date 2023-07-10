@@ -1,5 +1,6 @@
 package com.example.spotivote.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -49,9 +50,13 @@ fun HomeScreen(
 
 
     LaunchedEffect(user) {
-        val rooms = localService.getRooms()
-        userRooms = rooms.filter { room ->
-            room.users.any { it.id == user.id }
+        try {
+            val rooms = localService.getRooms()
+            userRooms = rooms.filter { room ->
+                room.users.any { it.id == user.id }
+            }
+        } catch (e: Exception) {
+            Log.e("Backend Error", "Local service backend error", e)
         }
     }
 
