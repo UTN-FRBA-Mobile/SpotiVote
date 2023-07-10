@@ -1,6 +1,7 @@
 package com.example.spotivote.activities
 
 import android.app.Activity
+import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -19,13 +20,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
 import com.example.spotivote.service.AddCandidateRequest
 import com.example.spotivote.service.CreateRoomRequest
-import com.example.spotivote.service.SocketIOService
-import com.example.spotivote.service.connectSpotifyAppRemote
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.registerToken
 import com.example.spotivote.service.firebase.registerTokenDB
 import com.example.spotivote.service.localService
-import com.example.spotivote.service.spotifyAppRemote
 import com.example.spotivote.service.spotifyService
 import com.example.spotivote.ui.screens.CreateRoomScreen
 import com.example.spotivote.ui.screens.HomeScreen
@@ -36,7 +34,6 @@ import com.example.spotivote.ui.screens.RoomByIdScreen
 import com.example.spotivote.ui.screens.SearchScreen
 import com.example.spotivote.ui.screens.SuggestTrackScreen
 import com.example.spotivote.ui.theme.SpotivoteTheme
-import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.launch
 
 
@@ -48,25 +45,22 @@ class MainActivity : ComponentActivity() {
                 App()
             }
         }
-
-        // reloadButton.setOnClickListener { setFirebaseTokenInView() }
-        // subscribeButton.setOnClickListener { subscribeToTopic() }
     }
 
     override fun onStart() {
         super.onStart()
-        connectSpotifyAppRemote(this)
+        //connectSpotifyAppRemote(this)
         registerToken(this)
-        SocketIOService.setSocket()
-        SocketIOService.establishConnection()
-        SocketIOService.setupNotifyListener()
+        //SocketIOService.setSocket()
+        //SocketIOService.establishConnection()
+        //SocketIOService.setupNotifyListener()
     }
 
     override fun onStop() {
         super.onStop()
-        spotifyAppRemote?.let {
+        /*spotifyAppRemote?.let {
             SpotifyAppRemote.disconnect(it)
-        }
+        }*/
     }
 }
 
@@ -85,18 +79,26 @@ fun App() {
     suspend fun getUser() {
         val response = spotifyService.getMe("Bearer $accessToken")
         Log.d("MainActivity", "getUser: $response")
-        if (response.images.isNotEmpty()) {
-            user = User(response.id, response.display_name, response.images[0].url)
+        user = if (response.images.isNotEmpty()) {
+            User(response.id, response.display_name, response.images[0].url)
         } else {
-            user = User(response.id, response.display_name, "")
+            User(response.id, response.display_name, "")
         }
     }
 
     LaunchedEffect(accessToken) {
         if (accessToken != "") {
+            Log.d("MainActivity", "accessToken: $accessToken")
             getUser()
             deviceToken = MyPreferences.getFirebaseToken(activity)
             registerTokenDB(deviceToken, user.id)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val roomIdIntent = activity.intent.getStringExtra("roomId")
+        if (!roomIdIntent.isNullOrEmpty()) {
+            navController.navigate("room-by-id/${roomIdIntent}")
         }
     }
 
@@ -140,7 +142,7 @@ fun App() {
         composable("qr-code-generator/{roomId}") {
             val roomId = it.arguments?.getString("roomId") ?: ""
 
-            QrCodeGeneratorScreen(user, roomId, onGoBack =  {
+            QrCodeGeneratorScreen(user, roomId, onGoBack = {
                 run {
                     navController.popBackStack()
                 }
@@ -149,16 +151,20 @@ fun App() {
         composable("create-room") {
             CreateRoomScreen(accessToken, user, onCreateRoom = {
                 coroutineScope.launch {
-                    val response = localService.createRoom(
-                        CreateRoomRequest(
-                            it.name,
-                            it.device,
-                            it.playlistId,
-                            user.id,
-                            accessToken
+                    try {
+                        val response = localService.createRoom(
+                            CreateRoomRequest(
+                                it.name,
+                                it.device,
+                                it.playlistId,
+                                user.id,
+                                accessToken
+                            )
                         )
-                    )
-                    navController.navigate("room-by-id/${response._id}")
+                        navController.navigate("room-by-id/${response._id}")
+                    } catch (e: Exception) {
+                        Log.e(ContentValues.TAG, "Local service backend error", e)
+                    }
                 }
             })
         }
@@ -191,9 +197,16 @@ fun App() {
                 user = user,
                 onSuggestTrack = { trackId, userId ->
                     coroutineScope.launch {
-                        val response =
-                            localService.addCandidate(roomId, AddCandidateRequest(trackId, userId))
-                        navController.navigate("room-by-id/${roomId}")
+                        try {
+                            val response =
+                                localService.addCandidate(
+                                    roomId,
+                                    AddCandidateRequest(trackId, userId)
+                                )
+                            navController.navigate("room-by-id/${roomId}")
+                        } catch (e: Exception) {
+                            Log.e("Backend Error", "Local service backend error", e)
+                        }
                     }
                 })
         }

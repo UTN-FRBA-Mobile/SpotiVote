@@ -1,10 +1,13 @@
 package com.example.spotivote.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,9 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,9 +50,13 @@ fun HomeScreen(
 
 
     LaunchedEffect(user) {
-        val rooms = localService.getRooms()
-        userRooms = rooms.filter { room ->
-            room.users.any { it.id == user.id }
+        try {
+            val rooms = localService.getRooms()
+            userRooms = rooms.filter { room ->
+                room.users.any { it.id == user.id }
+            }
+        } catch (e: Exception) {
+            Log.e("Backend Error", "Local service backend error", e)
         }
     }
 
@@ -58,16 +68,20 @@ fun HomeScreen(
         ) {
             NavBar(user = user)
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 24.dp),
+                    .fillMaxHeight()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column {
-                    Text(text = "Your Rooms", style = MaterialTheme.typography.h2)
-                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Select your playlist you want to play initially",
+                        text = "Your Rooms",
+                        style = MaterialTheme.typography.h1,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Select the playlist room you want to play initially",
                         style = MaterialTheme.typography.body1
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -78,12 +92,36 @@ fun HomeScreen(
                             .height(400.dp)
                             .background(color = Color(0xFF404040))
                     ) {
-                        LazyColumn {
-                            items(items = userRooms) { room ->
-                                Button(onClick = {
-                                    onNavigateToRoom(room._id)
-                                }) {
-                                    Text(text = room.name)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp)
+                                .align(Alignment.TopStart)
+                                .background(
+                                    color = Color.Transparent
+                                )
+                        ) {
+                            LazyColumn {
+                                items(items = userRooms) { room ->
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .clickable { onNavigateToRoom(room._id) }
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(top = 16.dp, bottom = 16.dp)
+                                                .weight(1f),
+                                            contentAlignment = Alignment.CenterStart
+                                        ) {
+                                            Text(text = room.name)
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowForward,
+                                            contentDescription = null,
+                                            tint = Color.Green
+                                        )
+                                    }
                                 }
                             }
                         }

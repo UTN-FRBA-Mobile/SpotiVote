@@ -80,6 +80,8 @@ data class JoinRoomRequest(
 )
 
 interface LocalService {
+    @GET("device-token")
+    suspend fun getAllDeviceTokens(): List<DeviceTokenResponse>
 
     @POST("device-token")
     suspend fun postDeviceToken(
