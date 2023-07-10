@@ -53,7 +53,7 @@ fun QrCodeGeneratorScreen(user: User, roomId: String, onGoBack: () -> Boolean) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(vertical = 24.dp, horizontal = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(

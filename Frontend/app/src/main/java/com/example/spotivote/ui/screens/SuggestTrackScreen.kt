@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -39,7 +41,8 @@ import com.example.spotivote.ui.components.NavBar
 
 @Composable
 fun SuggestTrackScreen(
-    accessToken: String, user: User, onSuggestTrack: (trackId: String, userId: String) -> Unit
+    accessToken: String, user: User, onSuggestTrack: (trackId: String, userId: String) -> Unit,
+    onNavigateToSearch: () -> Unit,
 ) {
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
     var trackId by remember { mutableStateOf("") }
@@ -71,7 +74,7 @@ fun SuggestTrackScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(vertical = 24.dp, horizontal = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -79,40 +82,35 @@ fun SuggestTrackScreen(
                     style = MaterialTheme.typography.h1,
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                Column {
-                    Column(
-                        modifier = Modifier.padding(top = 12.dp)
+                Spacer(modifier = Modifier.height(24.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Your most listened songs", style = MaterialTheme.typography.h2)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(shape = RoundedCornerShape(6.dp))
+                            .height(400.dp)
+                            .background(color = Color(0xFF404040))
                     ) {
-                        Text(text = "Your most listened songs", style = MaterialTheme.typography.h2)
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .clip(
-                                    shape = RoundedCornerShape(
-                                        topStart = 6.dp, topEnd = 6.dp
-                                    )
-                                )
-                                .height(400.dp)
-                                .background(color = Color(0xFF404040))
-                        ) {
-                            LazyColumn {
-                                items(items = tracks, itemContent = { track ->
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable(onClick = {
-                                                trackId = track.id
-                                            })
-                                            .background(
-                                                color = if (trackId == track.id) Color(
-                                                    0xFF303030
-                                                ) else Color.Transparent
-                                            )
-                                            .fillMaxWidth()
-                                            .padding(12.dp)
-                                            .align(Alignment.CenterStart)
+                        LazyColumn {
+                            items(items = tracks, itemContent = { track ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable(onClick = {
+                                            trackId = track.id
+                                        })
+                                        .background(
+                                            color = if (trackId == track.id) Color(
+                                                0xFF303030
+                                            ) else Color.Transparent
+                                        )
+                                        .padding(12.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
                                         AsyncImage(
                                             model = track.imageUri,
@@ -120,14 +118,13 @@ fun SuggestTrackScreen(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(2.dp))
                                                 .size(50.dp)
-                                                .align(Alignment.CenterStart)
                                                 .fillMaxSize()
                                         )
-
+                                        Spacer(
+                                            modifier = Modifier.width(12.dp)
+                                        )
                                         Column(
-                                            modifier = Modifier
-                                                .padding(start = 60.dp)
-                                                .align(Alignment.CenterStart)
+                                            modifier = Modifier.weight(1f)
                                         ) {
                                             Text(
                                                 text = track.name,
@@ -142,34 +139,31 @@ fun SuggestTrackScreen(
                                             )
                                         }
                                     }
-                                })
+                                }
+                            })
+                            item {
+                                Box(modifier = Modifier
+                                    .background(color = Color(0xFF404040))
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                                    .clickable { onNavigateToSearch() }) {
+                                    Text(
+                                        text = "Search another",
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(horizontal = 24.dp)
+                                    )
+                                }
                             }
                         }
-
-//                        Box(modifier = Modifier
-//                            .clip(
-//                                shape = RoundedCornerShape(
-//                                    bottomStart = 6.dp, bottomEnd = 6.dp
-//                                )
-//                            )
-//                            .background(color = Color(0xFF404040))
-//                            .fillMaxWidth()
-//                            .height(50.dp)
-//                            .clickable { onSuggestTrack() }) {
-//                            Text(
-//                                text = "Search another",
-//                                modifier = Modifier
-//                                    .align(Alignment.Center)
-//                                    .padding(horizontal = 24.dp)
-//                            )
-//                        }
                     }
                 }
 
-                Spacer(
-                    modifier = Modifier.defaultMinSize(minHeight = 24.dp)
-                )
+
                 if (trackId != "") {
+                    Spacer(
+                        modifier = Modifier.defaultMinSize(minHeight = 24.dp)
+                    )
                     Button(
                         onClick = {
                             onSuggestTrack(trackId, user.id)

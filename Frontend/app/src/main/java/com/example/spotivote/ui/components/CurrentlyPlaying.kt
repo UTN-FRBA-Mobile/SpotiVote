@@ -21,65 +21,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.spotivote.service.Candidate
+import com.example.spotivote.service.dto.local.Candidate
 
 
 @Composable
 fun CurrentlyPlaying(
     candidate: Candidate
 ) {
-//    var track: Track? by remember { mutableStateOf(null) }
-//    var user: User? by remember { mutableStateOf(null) }
-//    var isPaused by remember { mutableStateOf(false) }
-//    val imageBitmap = remember { mutableStateOf<Bitmap?>(null) }
-//
-//    LaunchedEffect(accessToken) {
-//        spotifyAppRemote?.let {
-//            it.playerApi.subscribeToPlayerState().setEventCallback { playerState ->
-//                val playerTrack = playerState.track
-//                isPaused = playerState.isPaused
-//
-//                it.imagesApi.getImage(playerTrack.imageUri).setResultCallback { bitmap ->
-//                    imageBitmap.value = bitmap
-//                }
-//
-//                if (playerTrack != null) track = Track(
-//                    id = playerTrack.uri.split(':')[2],
-//                    name = playerTrack.name,
-//                    artists = playerTrack.artist.name,
-//                    playlistId = roomConfig.playlistId,
-//                )
-//            }
-//        }
-//    }
-
-//    LaunchedEffect(accessToken, track) {
-//        if (track != null) {
-//            try {
-//                Log.e(TAG, "Local service backend error $track ${track!!.playlistId} ${track!!.id}")
-//
-//                val songResponse =
-//                    localService.getSong(track!!.playlistId, track!!.id, "Bearer $accessToken")
-//                if (songResponse.song.addedById.isNotEmpty()) {
-//                    //val userResponse = spotifyService.getMe("Bearer $accessToken")
-//                    val userResponse =
-//                        spotifyService.getUserById(
-//                            songResponse.song.addedById,
-//                            "Bearer $accessToken"
-//                        )
-//                    user = User(
-//                        userResponse.id,
-//                        userResponse.display_name,
-//                        userResponse.images.elementAt(0).url
-//                    )
-//                }
-//            } catch (e: Exception) {
-//                Log.e(TAG, "Local service backend error", e)
-//            }
-//        }
-//    }
-
-    return Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Column {
             Text(
                 text = "Playing now", style = MaterialTheme.typography.h2
@@ -118,9 +67,8 @@ fun CurrentlyPlaying(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // TODO: ajustar tamaño y agregar botones 👍 👎
         Column {
             Text(text = "Added by", style = MaterialTheme.typography.h6)
             Spacer(modifier = Modifier.height(8.dp))

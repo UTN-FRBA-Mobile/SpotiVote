@@ -3,7 +3,8 @@ package com.example.spotivote.service.firebase
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
-import com.example.spotivote.service.DeviceTokenRequest
+import com.example.spotivote.service.dto.local.DeviceTokenRequest
+
 import com.example.spotivote.service.localService
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging

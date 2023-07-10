@@ -33,10 +33,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.User
 import com.example.spotivote.service.Callbacks
-import com.example.spotivote.service.JoinRoomRequest
-import com.example.spotivote.service.RoomResponse
-import com.example.spotivote.service.VoteRequest
 import com.example.spotivote.service.WebSocketListener
+import com.example.spotivote.service.dto.local.JoinRoomRequest
+import com.example.spotivote.service.dto.local.RoomResponse
+import com.example.spotivote.service.dto.local.VoteRequest
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.sendNotificationToUser
 import com.example.spotivote.service.localService
@@ -61,12 +61,14 @@ fun RoomByIdScreen(
     var room by remember { mutableStateOf<RoomResponse?>(null) }
     val deviceToken = MyPreferences.getFirebaseToken(context)
 
-    LaunchedEffect(roomId) {
+    LaunchedEffect(roomId, accessToken, user) {
         // Utilizar el roomId para obtener los datos de la sala
         try {
-            val fetchedRoomConfig =
-                localService.joinRoom(roomId, JoinRoomRequest(user.id, accessToken))
-            room = fetchedRoomConfig
+            if (user.id != "" && accessToken != "") {
+                val fetchedRoomConfig =
+                    localService.joinRoom(roomId, JoinRoomRequest(user.id, accessToken))
+                room = fetchedRoomConfig
+            }
         } catch (e: Exception) {
             Log.e("Backend Error", "Local service backend error", e)
         }
@@ -99,20 +101,15 @@ fun RoomByIdScreen(
                 val tokensResponse = localService.getAllDeviceTokens()
                 var isSuccessful = false
                 tokensResponse.map {
-                    if (deviceToken != it.deviceToken)
-                        isSuccessful = sendNotificationToUser(
-                            it.deviceToken,
-                            "You are invited to the room ${room!!.name}",
-                            room!!._id
-                        )
-                }
-                Toast
-                    .makeText(
-                        context,
-                        "The invitations has${if (isSuccessful) "n't" else ""} been sent!",
-                        Toast.LENGTH_LONG
+                    if (deviceToken != it.deviceToken) isSuccessful = sendNotificationToUser(
+                        it.deviceToken, "You are invited to the room ${room!!.name}", room!!._id
                     )
-                    .show()
+                }
+                Toast.makeText(
+                    context,
+                    "The invitations has${if (isSuccessful) "n't" else ""} been sent!",
+                    Toast.LENGTH_LONG
+                ).show()
             } catch (e: Exception) {
                 Log.e("Backend Error", "Local service backend error", e)
             }
@@ -135,7 +132,7 @@ fun RoomByIdScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(24.dp),
+                        .padding(vertical = 24.dp, horizontal = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
@@ -151,12 +148,14 @@ fun RoomByIdScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     VoteSection(tracks = room!!.candidates.map { candidate ->
+                        val imageUri =
+                            if (candidate.track.album.images.isNotEmpty()) candidate.track.album.images[0].url else ""
                         TrackInPoll(
                             track = TrackInPollTrack(
                                 candidate.track.id,
                                 candidate.track.name,
                                 candidate.track.artists.joinToString(", ") { it.name },
-                                candidate.track.album.images[0].url,
+                                imageUri
                             ),
                             votes = candidate.votes,
                         )
@@ -190,29 +189,25 @@ fun RoomByIdScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
-                        text = "Send invitations",
+                    Text(text = "Send invitations",
                         style = MaterialTheme.typography.button,
                         color = Color.Green,
                         modifier = Modifier
                             .clickable {
                                 sendInvitations()
                             }
-                            .padding(horizontal = 24.dp)
-                    )
+                            .padding(horizontal = 24.dp))
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
-                        text = "Generate QR Code",
+                    Text(text = "Generate QR Code",
                         style = MaterialTheme.typography.button,
                         color = Color.Green,
                         modifier = Modifier
                             .clickable {
                                 onGoToQrCodeGenerator()
                             }
-                            .padding(horizontal = 24.dp)
-                    )
+                            .padding(horizontal = 24.dp))
                 }
             }
         } else {

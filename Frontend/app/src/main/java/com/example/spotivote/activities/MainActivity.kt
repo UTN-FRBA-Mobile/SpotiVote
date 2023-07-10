@@ -18,8 +18,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.spotivote.model.User
-import com.example.spotivote.service.AddCandidateRequest
-import com.example.spotivote.service.CreateRoomRequest
+import com.example.spotivote.service.dto.local.AddCandidateRequest
+import com.example.spotivote.service.dto.local.CreateRoomRequest
 import com.example.spotivote.service.firebase.MyPreferences
 import com.example.spotivote.service.firebase.registerToken
 import com.example.spotivote.service.firebase.registerTokenDB
@@ -49,18 +49,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        //connectSpotifyAppRemote(this)
         registerToken(this)
-        //SocketIOService.setSocket()
-        //SocketIOService.establishConnection()
-        //SocketIOService.setupNotifyListener()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        /*spotifyAppRemote?.let {
-            SpotifyAppRemote.disconnect(it)
-        }*/
     }
 }
 
@@ -139,6 +128,7 @@ fun App() {
                 }
             })
         }
+
         composable("qr-code-generator/{roomId}") {
             val roomId = it.arguments?.getString("roomId") ?: ""
 
@@ -148,17 +138,14 @@ fun App() {
                 }
             })
         }
+
         composable("create-room") {
             CreateRoomScreen(accessToken, user, onCreateRoom = {
                 coroutineScope.launch {
                     try {
                         val response = localService.createRoom(
                             CreateRoomRequest(
-                                it.name,
-                                it.device,
-                                it.playlistId,
-                                user.id,
-                                accessToken
+                                it.name, it.device, it.playlistId, user.id, accessToken
                             )
                         )
                         navController.navigate("room-by-id/${response._id}")
@@ -168,15 +155,6 @@ fun App() {
                 }
             })
         }
-
-//        composable("join-room") {
-//            CreateRoomScreen(accessToken, onCreateRoom = {
-//                roomConfig = it
-//                run {
-//                    navController.navigate("room-by-id")
-//                }
-//            })
-//        }
 
         composable("room-by-id/{roomId}") {
             val roomId = it.arguments?.getString("roomId") ?: ""
@@ -192,30 +170,42 @@ fun App() {
         }
         composable("suggest-track/{roomId}") {
             val roomId = it.arguments?.getString("roomId") ?: ""
-            SuggestTrackScreen(
-                accessToken = accessToken,
+            SuggestTrackScreen(accessToken = accessToken,
                 user = user,
                 onSuggestTrack = { trackId, userId ->
                     coroutineScope.launch {
                         try {
-                            val response =
-                                localService.addCandidate(
-                                    roomId,
-                                    AddCandidateRequest(trackId, userId)
-                                )
+                            val response = localService.addCandidate(
+                                roomId, AddCandidateRequest(trackId, userId)
+                            )
+                            navController.navigate("room-by-id/${roomId}")
+                        } catch (e: Exception) {
+                            Log.e("Backend Error", "Local service backend error", e)
+                        }
+                    }
+                },
+                onNavigateToSearch = {
+                    run {
+                        navController.navigate("search/$roomId")
+                    }
+                })
+        }
+        composable("search/{roomId}") {
+            val roomId = it.arguments?.getString("roomId") ?: ""
+            SearchScreen(accessToken = accessToken,
+                user = user,
+                onSuggestTrack = { trackId, userId ->
+                    coroutineScope.launch {
+                        try {
+                            val response = localService.addCandidate(
+                                roomId, AddCandidateRequest(trackId, userId)
+                            )
                             navController.navigate("room-by-id/${roomId}")
                         } catch (e: Exception) {
                             Log.e("Backend Error", "Local service backend error", e)
                         }
                     }
                 })
-        }
-        composable("search") {
-            SearchScreen(accessToken, onSearchTrack = {
-                run {
-                    navController.navigate("")
-                }
-            })
         }
     }
 }

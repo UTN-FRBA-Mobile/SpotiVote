@@ -117,7 +117,7 @@ fun CreateRoomScreen(
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(24.dp),
+                    .padding(vertical = 24.dp, horizontal = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -181,7 +181,7 @@ fun CreateRoomScreen(
                     Text(text = "Your playlists", style = MaterialTheme.typography.h2)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Select your playlist you want to play initially",
+                        text = "Select your playlist you want to use as a pool of songs",
                         style = MaterialTheme.typography.body1
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -189,7 +189,7 @@ fun CreateRoomScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(shape = RoundedCornerShape(6.dp))
-                            .height(400.dp)
+                            .height(300.dp)
                             .background(color = Color(0xFF404040))
                     ) {
                         LazyColumn {
@@ -202,11 +202,11 @@ fun CreateRoomScreen(
                     }
                 }
 
-                Spacer(
-                    modifier = Modifier.height(24.dp)
-                )
 
                 if (playlistId != "" && device != "" && name != "") {
+                    Spacer(
+                        modifier = Modifier.height(24.dp)
+                    )
                     Button(
                         onClick = {
                             onCreateRoom(

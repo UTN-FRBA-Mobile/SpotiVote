@@ -30,10 +30,7 @@ import com.example.spotivote.model.User
 
 
 data class TrackInPollTrack(
-    val id: String = "",
-    val name: String = "",
-    val artists: String = "",
-    val imageUri: String? = ""
+    val id: String = "", val name: String = "", val artists: String = "", val imageUri: String? = ""
 )
 
 data class TrackInPoll(val track: TrackInPollTrack, val votes: List<String>)
@@ -49,25 +46,25 @@ fun VoteSection(tracks: List<TrackInPoll>, user: User, onVote: (String) -> Unit)
             modifier = Modifier
                 .clip(shape = RoundedCornerShape(6.dp))
                 .background(color = Color(0xFF404040))
-                .height((tracks.size * 74).dp)
+                .height(((tracks.size * 74).coerceAtMost(400)).dp)
         ) {
             LazyColumn {
                 items(items = tracks, itemContent = { trackInPoll ->
                     val isVoted = trackInPoll.votes.contains(user.id)
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(12.dp)
-                            .align(Alignment.CenterStart)
                             .clickable(onClick = {
                                 onVote(trackInPoll.track.id)
                             })
                             .background(
                                 color = Color.Transparent
                             )
+                            .padding(12.dp)
                     ) {
-                        Row() {
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             AsyncImage(
                                 model = trackInPoll.track.imageUri,
                                 contentDescription = "Track Image",
@@ -79,8 +76,9 @@ fun VoteSection(tracks: List<TrackInPoll>, user: User, onVote: (String) -> Unit)
                             Spacer(
                                 modifier = Modifier.width(12.dp)
                             )
-
-                            Column() {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(
                                     text = trackInPoll.track.name,
                                     style = MaterialTheme.typography.body1,
@@ -92,13 +90,14 @@ fun VoteSection(tracks: List<TrackInPoll>, user: User, onVote: (String) -> Unit)
                                     color = Color.Gray
                                 )
                             }
-
                             Spacer(
                                 modifier = Modifier.weight(1f)
                             )
-
+                            // Quiero que este componente quede alineado en el centro vertical de la fila
                             BoxWithConstraints(
-                                modifier = Modifier.size(36.dp), // Adjust the size of the circle as needed
+                                modifier = Modifier
+                                    .width(36.dp)
+                                    .align(Alignment.CenterVertically),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Box(
@@ -109,8 +108,7 @@ fun VoteSection(tracks: List<TrackInPoll>, user: User, onVote: (String) -> Unit)
                                             color = if (isVoted) Color.Green else Color(
                                                 0xFF303030
                                             )
-                                        ),
-                                    contentAlignment = Alignment.Center
+                                        ), contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(8.dp),

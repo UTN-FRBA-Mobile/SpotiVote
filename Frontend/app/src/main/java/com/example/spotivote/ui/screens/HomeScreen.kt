@@ -22,11 +22,13 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +36,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.spotivote.model.User
-import com.example.spotivote.service.RoomResponse
+import com.example.spotivote.service.dto.local.RoomResponse
 import com.example.spotivote.service.localService
 import com.example.spotivote.ui.components.NavBar
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -48,8 +51,9 @@ fun HomeScreen(
 ) {
     var userRooms by remember { mutableStateOf<List<RoomResponse>>(emptyList()) }
 
+    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(user) {
+    suspend fun getUserRooms() {
         try {
             val rooms = localService.getRooms()
             userRooms = rooms.filter { room ->
@@ -60,8 +64,10 @@ fun HomeScreen(
         }
     }
 
-    // Crear sala o unirse a una
-    // TODO: Mostrar listado de mis salas
+    LaunchedEffect(user) {
+        getUserRooms()
+    }
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -70,7 +76,9 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(24.dp),
+                    .padding(
+                        vertical = 24.dp, horizontal = 12.dp
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column {
@@ -79,12 +87,13 @@ fun HomeScreen(
                         style = MaterialTheme.typography.h1,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Select the playlist room you want to play initially",
-                        style = MaterialTheme.typography.body1
+                        text = "Here you can see the rooms you are in",
+                        style = MaterialTheme.typography.body1,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -92,36 +101,48 @@ fun HomeScreen(
                             .height(400.dp)
                             .background(color = Color(0xFF404040))
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp)
-                                .align(Alignment.TopStart)
-                                .background(
-                                    color = Color.Transparent
-                                )
-                        ) {
-                            LazyColumn {
-                                items(items = userRooms) { room ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
+                        LazyColumn {
+                            items(items = userRooms) { room ->
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .clickable { onNavigateToRoom(room._id) }
+                                        .padding(horizontal = 12.dp)) {
+                                    Box(
                                         modifier = Modifier
-                                            .clickable { onNavigateToRoom(room._id) }
+                                            .padding(vertical = 16.dp)
+                                            .weight(1f),
+                                        contentAlignment = Alignment.CenterStart
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(top = 16.dp, bottom = 16.dp)
-                                                .weight(1f),
-                                            contentAlignment = Alignment.CenterStart
-                                        ) {
-                                            Text(text = room.name)
-                                        }
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowForward,
-                                            contentDescription = null,
-                                            tint = Color.Green
-                                        )
+                                        Text(text = room.name)
                                     }
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = null,
+                                        tint = Color.Green
+                                    )
+                                }
+                            }
+                            item {
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .clickable {
+                                            coroutineScope.launch {
+                                                getUserRooms()
+                                            }
+                                        }
+                                        .padding(horizontal = 12.dp)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top = 16.dp, bottom = 16.dp)
+                                            .weight(1f), contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Text(text = "Refresh rooms")
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = null,
+                                        tint = Color.Green
+                                    )
                                 }
                             }
                         }
@@ -132,7 +153,6 @@ fun HomeScreen(
 
                 Button(
                     onClick = {
-                        // ir a crear sala
                         onNavigateToCreateRoom()
                     }, modifier = Modifier
                         .height(48.dp)
@@ -147,14 +167,12 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text = "Scan QR",
+                Text(text = "Scan QR",
                     style = MaterialTheme.typography.button,
                     color = Color.Green,
                     modifier = Modifier
                         .clickable { onNavigateToQrCodeScanner() }
-                        .padding(horizontal = 24.dp)
-                )
+                        .padding(horizontal = 24.dp))
             }
         }
     }
