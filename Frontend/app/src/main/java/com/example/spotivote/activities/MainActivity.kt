@@ -60,6 +60,8 @@ fun App() {
     val activity = LocalContext.current as Activity
     var deviceToken: String? by remember { mutableStateOf("") }
 
+    var roomToGo by remember { mutableStateOf("") }
+
     var accessToken by remember { mutableStateOf("") }
     var user by remember { mutableStateOf(User("", "", "")) }
 
@@ -87,7 +89,12 @@ fun App() {
     LaunchedEffect(Unit) {
         val roomIdIntent = activity.intent.getStringExtra("roomId")
         if (!roomIdIntent.isNullOrEmpty()) {
-            navController.navigate("room-by-id/${roomIdIntent}")
+            if (accessToken != "" && user.id != "") {
+                navController.navigate("room-by-id/${roomIdIntent}")
+            } else {
+                roomToGo = roomIdIntent
+                navController.navigate("login")
+            }
         }
     }
 
@@ -96,7 +103,11 @@ fun App() {
             LoginScreen(activity) { token ->
                 run {
                     accessToken = token
-                    navController.navigate("home")
+                    if (roomToGo != "") {
+                        navController.navigate("room-by-id/${roomToGo}")
+                    } else {
+                        navController.navigate("home")
+                    }
                 }
             }
         }
