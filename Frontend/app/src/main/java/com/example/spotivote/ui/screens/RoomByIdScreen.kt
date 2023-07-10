@@ -75,7 +75,7 @@ fun RoomByIdScreen(
     }
 
     val client = OkHttpClient()
-    val socketUrl = "ws://10.0.2.2:8055"
+    val socketUrl = "ws://192.168.0.3:8055"
     val request: Request = Request.Builder().url(socketUrl).build()
 
     val listener = WebSocketListener(Callbacks(onRefetch = {
