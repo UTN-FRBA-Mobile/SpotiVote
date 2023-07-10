@@ -6,7 +6,6 @@ import android.util.Log
 import com.example.spotivote.service.DeviceTokenRequest
 import com.example.spotivote.service.localService
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.Constants.MessageNotificationKeys.TAG
 import com.google.firebase.messaging.ktx.messaging
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +36,9 @@ data class NotificationRequest(
     @SerializedName("to")
     val to: String,
     @SerializedName("notification")
-    val notification: Map<String, Any>
+    val notification: Map<String, Any>,
+    @SerializedName("data")
+    val data: Map<String, String>
 )
 
 interface FCMService {
@@ -69,21 +70,23 @@ suspend fun registerTokenDB(deviceToken: String?, userId: String){
         try {
             localService.postDeviceToken(reqDeviceToken)
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Local service backend error", e)
+            Log.e("Backend Error", "Local service backend error", e)
         }
     }
 }
 
-fun sendNotificationToUser(deviceToken: String?, message: String) {
+fun sendNotificationToUser(deviceToken: String?, message: String, roomId: String): Boolean {
     // val hasNotificationPermission = MyPreferences.getNotificationPermission(context)
+    var isSuccessful = false
+
     Log.d("Device Token", "deviceToken: $deviceToken")
     if (deviceToken != null) {
         val apiKey =
             "AAAAiQfH7c0:APA91bFAhyYr1gaE1mz-1O-qZOumIuXFpBeJ756yFK5CbcJC8SjHJguKTX2h4ZxsN3HU8a4XIv9DlyQmgP3VPnFkxPje445xTij2yUFnnsAeVfM43k5Ezpa9qMbhVoIVepOot44SOpKg" // TODO: obtenerla de un .env
-
         val notificationRequest = NotificationRequest(
             to = deviceToken,
-            notification = mapOf("title" to "Room invitation...", "body" to message)
+            notification = mapOf("title" to "Room invitation!", "body" to message),
+            data = mapOf("roomId" to roomId)
         )
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -93,12 +96,14 @@ fun sendNotificationToUser(deviceToken: String?, message: String) {
                     body = notificationRequest
                 )
                 Log.d(
-                    ContentValues.TAG,
+                    "Push Notification",
                     "Response isSuccessful notification: ${response.isSuccessful}"
                 )
+                isSuccessful = response.isSuccessful
             } catch (e: IOException) {
-                Log.e(TAG, "Error notification IOException: $e")
+                Log.e("Push Notification", "Error notification IOException: $e")
             }
         }
     }
+    return isSuccessful
 }
